@@ -1,0 +1,18 @@
+{
+  "name": "chatbot-wpp",
+  "version": "1.0.0",
+  "description": "Liber's chatbot.",
+  "main": "chatbot.js",
+  "scripts": {
+    "start": "node chatbot.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.9.0",
+    "puppeteer": "^19.5.2",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.19.2"
+  },
+  "devDependencies": {
+    "prisma": "^4.9.0"
+  }
+}
