@@ -218,8 +218,6 @@ async function checkUserStages(user, message) {
         );
 
         userStagesSession[message.from] = "in_attendance";
-    } else if (message.fromMe && message.body == "atendimento finalizado") {
-        console.log("atendimento finalizado com sucesso!");
     }
 }
 
