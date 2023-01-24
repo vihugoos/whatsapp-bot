@@ -81,7 +81,57 @@ async function checkUserStages(user, message) {
         if (userStagesSession[message.from] == undefined) {
             client.sendMessage(
                 message.from,
-                "Checamos no nosso sistema que você ainda não possui um cadastro, vamos dar prosseguimento no cadastro por aqui mesmo, iremos apenas precisar de algumas informações."
+                "Você já possui um cadastro? Digite *'sim'* ou *'não'*."
+            );
+
+            userStagesSession[message.from] = "check_registration";
+        } else if (message.body.toLowerCase() === "sim") {
+            client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
+
+            userStagesSession[message.from] = "already_registered";
+        } else if (userStagesSession[message.from] == "already_registered") {
+            user.cpf = message.body.replace(/[^\d]+/g, "");
+
+            previous_registration = await prisma.users.findFirst({
+                where: {
+                    cpf: user.cpf,
+                },
+            });
+
+            await prisma.users.delete({
+                where: {
+                    id: previous_registration.id,
+                },
+            });
+
+            user = await prisma.users.update({
+                where: {
+                    phone_number: user.phone_number,
+                },
+                data: {
+                    name: previous_registration.name,
+                    cpf: previous_registration.cpf,
+                },
+            });
+
+            client.sendMessage(
+                message.from,
+                `${user.name}, seu novo número de celular foi atualizado com sucesso!`
+            );
+
+            client.sendMessage(
+                message.from,
+                "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
+            );
+
+            userStagesSession[message.from] = "services";
+        } else if (
+            userStagesSession[message.from] === "check_registration" &&
+            message.body.toLowerCase() === "não"
+        ) {
+            client.sendMessage(
+                message.from,
+                "Vamos dar prosseguimento no cadastro por aqui mesmo, iremos apenas precisar de algumas informações."
             );
 
             client.sendMessage(
