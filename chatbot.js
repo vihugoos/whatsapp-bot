@@ -4,6 +4,8 @@ const qrcode = require("qrcode-terminal");
 
 const prisma = new PrismaClient();
 
+var userStagesSession = [];
+
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -33,9 +35,22 @@ client.on("disconnected", (reason) => {
 });
 
 client.on("message", async (message) => {
-    console.log("\n[chatbot-wpp]: Message typed by the user:", message.body);
+    console.log(
+        `\n[chatbot-wpp]: New message from ${message.from}:`,
+        message.body
+    );
 
     identifyUserByPhoneNumber(message);
+});
+
+client.on("message_create", (message) => {
+    if (message.fromMe) {
+        if (message.body.toLowerCase().includes("atendimento finalizado")) {
+            userStagesSession[message.to] = undefined;
+
+            console.log("\n[chatbot-wpp]: Attendance finished.");
+        }
+    }
 });
 
 async function identifyUserByPhoneNumber(message) {
@@ -55,12 +70,10 @@ async function identifyUserByPhoneNumber(message) {
         });
     }
 
-    console.log("\n[chatbot-wpp]: Current user:", user);
+    console.log("[chatbot-wpp]: User ID:", user.id);
 
     checkUserStages(user, message);
 }
-
-var userStagesSession = [];
 
 async function checkUserStages(user, message) {
     if (userStagesSession[message.from] == undefined) {
@@ -205,6 +218,8 @@ async function checkUserStages(user, message) {
         );
 
         userStagesSession[message.from] = "in_attendance";
+    } else if (message.fromMe && message.body == "atendimento finalizado") {
+        console.log("atendimento finalizado com sucesso!");
     }
 }
 
