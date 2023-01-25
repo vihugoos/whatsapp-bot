@@ -4,7 +4,7 @@ const qrcode = require("qrcode-terminal");
 
 const prisma = new PrismaClient();
 
-var userStagesSession = [];
+var userStages = [];
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -46,9 +46,9 @@ client.on("message", async (message) => {
 client.on("message_create", (message) => {
     if (message.fromMe) {
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
-            userStagesSession[message.to] = undefined;
+            userStages[message.to] = undefined;
 
-            console.log("\n[chatbot-wpp]: Attendance finished.");
+            console.log(`\n[chatbot-wpp]: Attendance ended for ${message.to}`);
         }
     }
 });
@@ -76,7 +76,7 @@ async function identifyUserByPhoneNumber(message) {
 }
 
 async function checkUserStages(user, message) {
-    if (userStagesSession[message.from] == undefined) {
+    if (userStages[message.from] == undefined) {
         if (user.name) {
             client.sendMessage(
                 message.from,
@@ -87,81 +87,94 @@ async function checkUserStages(user, message) {
         } else {
             client.sendMessage(
                 message.from,
-                "Olá, eu sou a assistente virtual da *Liber*, estou aqui para auxiliá-lo(a) no seu atendimento."
+                "Olá, eu sou a assistente virtual da Liber, estou aqui para auxiliá-lo(a) no seu atendimento."
             );
         }
     }
 
     if (user.name == null) {
-        if (userStagesSession[message.from] == undefined) {
+        if (userStages[message.from] == undefined) {
             client.sendMessage(
                 message.from,
-                "Você já possui um cadastro? Digite *'sim'* ou *'não'*."
+                "Já possui um cadastro? Digite *'sim'* ou *'não'*."
             );
 
-            userStagesSession[message.from] = "check_registration";
-        } else if (
-            userStagesSession[message.from] == "check_registration" &&
-            message.body.toLowerCase() === "sim"
-        ) {
-            client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
+            userStages[message.from] = "askedIfAlreadyRegistered";
+        } else if (userStages[message.from] === "askedIfAlreadyRegistered") {
+            let messageFromUser = message.body
+                .replace(/[ìí]/gi, "i")
+                .replace(/[ã]/gi, "a")
+                .toLowerCase();
 
-            userStagesSession[message.from] = "already_registered";
-        } else if (userStagesSession[message.from] == "already_registered") {
+            if (messageFromUser === "sim") {
+                client.sendMessage(
+                    message.from,
+                    "Apenas para confirmação, por gentiliza digite seu *CPF*."
+                );
+
+                userStages[message.from] = "userAlreadyHasAnAccount";
+            } else if (messageFromUser === "nao") {
+                client.sendMessage(
+                    message.from,
+                    "Vamos dar prosseguimento no cadastro por aqui mesmo, iremos apenas precisar de algumas informações."
+                );
+
+                client.sendMessage(
+                    message.from,
+                    "Digite seu *NOME* completo por favor."
+                );
+
+                userStages[message.from] = "requestedFullName";
+            } else {
+                console.log("Reposta inválida, por favor, tente novamente.");
+            }
+        } else if (userStages[message.from] === "userAlreadyHasAnAccount") {
             user.cpf = message.body.replace(/[^\d]+/g, "");
 
-            previous_registration = await prisma.users.findFirst({
-                where: {
-                    cpf: user.cpf,
-                },
-            });
+            if (user.cpf.length != 11) {
+                client.sendMessage(
+                    message.from,
+                    "CPF inválido, por gentileza digite novamente."
+                );
+            } else {
+                previous_registration = await prisma.users.findFirst({
+                    where: {
+                        cpf: user.cpf,
+                    },
+                });
 
-            await prisma.users.delete({
-                where: {
-                    id: previous_registration.id,
-                },
-            });
+                await prisma.users.delete({
+                    where: {
+                        id: previous_registration.id,
+                    },
+                });
 
-            user = await prisma.users.update({
-                where: {
-                    phone_number: user.phone_number,
-                },
-                data: {
-                    name: previous_registration.name,
-                    cpf: previous_registration.cpf,
-                },
-            });
+                user = await prisma.users.update({
+                    where: {
+                        phone_number: user.phone_number,
+                    },
+                    data: {
+                        name: previous_registration.name,
+                        cpf: previous_registration.cpf,
+                    },
+                });
 
-            client.sendMessage(
-                message.from,
-                `${
-                    user.name.split(" ")[0]
-                }, seu novo número de celular foi atualizado com sucesso!`
-            );
+                client.sendMessage(
+                    message.from,
+                    `${
+                        user.name.split(" ")[0]
+                    }, seu novo número de celular foi atualizado com sucesso!`
+                );
 
-            client.sendMessage(
-                message.from,
-                "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
-            );
+                client.sendMessage(
+                    message.from,
+                    "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
+                );
 
-            userStagesSession[message.from] = "services";
-        } else if (
-            userStagesSession[message.from] === "check_registration" &&
-            message.body.toLowerCase() === "não"
-        ) {
-            client.sendMessage(
-                message.from,
-                "Vamos dar prosseguimento no cadastro por aqui mesmo, iremos apenas precisar de algumas informações."
-            );
-
-            client.sendMessage(
-                message.from,
-                "Digite seu *NOME* completo por favor."
-            );
-
-            userStagesSession[message.from] = "nome";
-        } else {
-            user.name = message.body;
+                userStages[message.from] = "requestedServiceNumber";
+            }
+        } else if (userStages[message.from] === "requestedFullName") {
+            user.name = message.body.replace(/[^a-zA-Z ]/g, "");
 
             await prisma.users.update({
                 where: {
@@ -174,60 +187,78 @@ async function checkUserStages(user, message) {
 
             client.sendMessage(
                 message.from,
-                `Obrigado, ${message.body.split(" ")[0]}!`
+                `Obrigado, ${user.name.split(" ")[0]}!`
             );
 
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
-            userStagesSession[message.from] = "cpf";
+            userStages[message.from] = "requestedCPF";
         }
     } else if (user.cpf === null) {
-        if (userStagesSession[message.from] == undefined) {
+        if (userStages[message.from] == undefined) {
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
-            userStagesSession[message.from] = "cpf";
-        } else {
+            userStages[message.from] = "requestedCPF";
+        } else if (userStages[message.from] === "requestedCPF") {
             user.cpf = message.body.replace(/[^\d]+/g, "");
 
-            await prisma.users.update({
-                where: {
-                    id: user.id,
-                },
-                data: {
-                    cpf: user.cpf,
-                },
-            });
+            if (user.cpf.length != 11) {
+                client.sendMessage(
+                    message.from,
+                    "CPF inválido, por gentileza digite novamente."
+                );
+            } else {
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        cpf: user.cpf,
+                    },
+                });
 
-            client.sendMessage(message.from, "Obrigado por informar seu CPF.");
+                client.sendMessage(
+                    message.from,
+                    "Obrigado por informar seu CPF."
+                );
 
-            client.sendMessage(
-                message.from,
-                "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
-            );
+                client.sendMessage(
+                    message.from,
+                    "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
+                );
 
-            userStagesSession[message.from] = "services";
+                userStages[message.from] = "requestedServiceNumber";
+            }
         }
-    } else if (userStagesSession[message.from] == undefined) {
-        if (userStagesSession[message.from] == undefined) {
-            userStagesSession[message.from] = "services";
-        }
-
+    } else if (userStages[message.from] == undefined) {
         client.sendMessage(
             message.from,
             "Digite o número de alguns dos nossos serviços disponíveis:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
         );
-    } else if (userStagesSession[message.from] == "services") {
-        client.sendMessage(
-            message.from,
-            `Você escolheu o serviço de número ${message.body}.`
-        );
 
-        client.sendMessage(
-            message.from,
-            "Aguarde alguns instantes que irei encaminha-lo para algum dos nossos atendentes, você será atendido em breve."
-        );
+        userStages[message.from] = "requestedServiceNumber";
+    } else if (userStages[message.from] == "requestedServiceNumber") {
+        const listNumbersService = ["1", "2", "3", "4", "5"];
+        const chosenNumber = message.body;
 
-        userStagesSession[message.from] = "in_attendance";
+        if (!listNumbersService.includes(chosenNumber)) {
+            client.sendMessage(
+                message.from,
+                "Número inválido, por favor tente novamente."
+            );
+        } else {
+            client.sendMessage(
+                message.from,
+                `Você escolheu o serviço de número ${chosenNumber}.`
+            );
+
+            client.sendMessage(
+                message.from,
+                "Aguarde alguns instantes que irei encaminha-lo para algum dos nossos atendentes, você será atendido em breve."
+            );
+
+            userStages[message.from] = "in_attendance";
+        }
     }
 }
 
