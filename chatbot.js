@@ -80,7 +80,9 @@ async function checkUserStages(user, message) {
         if (user.name) {
             client.sendMessage(
                 message.from,
-                `Olá ${user.name}, eu sou a assistente virtual da *Liber*, estou aqui para auxiliá-lo(a) no seu atendimento.`
+                `Olá ${
+                    user.name.split(" ")[0]
+                }, eu sou a assistente virtual da Liber, estou aqui para auxiliá-lo(a) no seu atendimento.`
             );
         } else {
             client.sendMessage(
@@ -98,7 +100,10 @@ async function checkUserStages(user, message) {
             );
 
             userStagesSession[message.from] = "check_registration";
-        } else if (message.body.toLowerCase() === "sim") {
+        } else if (
+            userStagesSession[message.from] == "check_registration" &&
+            message.body.toLowerCase() === "sim"
+        ) {
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
             userStagesSession[message.from] = "already_registered";
@@ -129,7 +134,9 @@ async function checkUserStages(user, message) {
 
             client.sendMessage(
                 message.from,
-                `${user.name}, seu novo número de celular foi atualizado com sucesso!`
+                `${
+                    user.name.split(" ")[0]
+                }, seu novo número de celular foi atualizado com sucesso!`
             );
 
             client.sendMessage(
@@ -165,7 +172,10 @@ async function checkUserStages(user, message) {
                 },
             });
 
-            client.sendMessage(message.from, `Obrigado, ${message.body}!`);
+            client.sendMessage(
+                message.from,
+                `Obrigado, ${message.body.split(" ")[0]}!`
+            );
 
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
