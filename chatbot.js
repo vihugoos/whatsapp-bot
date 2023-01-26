@@ -4,7 +4,7 @@ const qrcode = require("qrcode-terminal");
 
 const prisma = new PrismaClient();
 
-var userStages = [];
+var userStage = [];
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -46,7 +46,7 @@ client.on("message", async (message) => {
 client.on("message_create", (message) => {
     if (message.fromMe) {
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
-            userStages[message.to] = undefined;
+            userStage[message.to] = undefined;
 
             console.log(`\n[chatbot-wpp]: Attendance ended for ${message.to}`);
         }
@@ -54,6 +54,8 @@ client.on("message_create", (message) => {
 });
 
 async function identifyUserByPhoneNumber(message) {
+    if (message.from === "status@broadcast") return;
+
     const phone_number = (await message.getContact()).number;
 
     let user = await prisma.users.findFirst({
@@ -72,11 +74,14 @@ async function identifyUserByPhoneNumber(message) {
 
     console.log("[chatbot-wpp]: User ID:", user.id);
 
-    checkUserStages(user, message);
+    checkUserStage(user, message);
 }
 
-async function checkUserStages(user, message) {
-    if (userStages[message.from] == undefined) {
+async function checkUserStage(user, message) {
+    const USER_WITHOUT_SESSION = undefined;
+    const FIELD_NOT_REGISTERED = null;
+
+    if (userStage[message.from] === USER_WITHOUT_SESSION) {
         if (user.name) {
             client.sendMessage(
                 message.from,
@@ -92,15 +97,15 @@ async function checkUserStages(user, message) {
         }
     }
 
-    if (user.name == null) {
-        if (userStages[message.from] == undefined) {
+    if (user.name === FIELD_NOT_REGISTERED) {
+        if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                "Já possui um cadastro? Digite *'sim'* ou *'não'*."
+                "Já possui um cadastro anterior? Digite *'sim'* ou *'não'*."
             );
 
-            userStages[message.from] = "askedIfAlreadyRegistered";
-        } else if (userStages[message.from] === "askedIfAlreadyRegistered") {
+            userStage[message.from] = "askedIfAlreadyRegistered";
+        } else if (userStage[message.from] === "askedIfAlreadyRegistered") {
             let messageFromUser = message.body
                 .replace(/[ìí]/gi, "i")
                 .replace(/[ã]/gi, "a")
@@ -112,7 +117,8 @@ async function checkUserStages(user, message) {
                     "Apenas para confirmação, por gentiliza digite seu *CPF*."
                 );
 
-                userStages[message.from] = "userAlreadyHasAnAccount";
+                userStage[message.from] =
+                    "requestedCPFToConfirmPreviousRegistration";
             } else if (messageFromUser === "nao") {
                 client.sendMessage(
                     message.from,
@@ -124,11 +130,14 @@ async function checkUserStages(user, message) {
                     "Digite seu *NOME* completo por favor."
                 );
 
-                userStages[message.from] = "requestedFullName";
+                userStage[message.from] = "requestedFullName";
             } else {
                 console.log("Reposta inválida, por favor, tente novamente.");
             }
-        } else if (userStages[message.from] === "userAlreadyHasAnAccount") {
+        } else if (
+            userStage[message.from] ===
+            "requestedCPFToConfirmPreviousRegistration"
+        ) {
             user.cpf = message.body.replace(/[^\d]+/g, "");
 
             if (user.cpf.length != 11) {
@@ -166,14 +175,11 @@ async function checkUserStages(user, message) {
                     }, seu novo número de celular foi atualizado com sucesso!`
                 );
 
-                client.sendMessage(
-                    message.from,
-                    "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
-                );
+                sendServiceOptions(message);
 
-                userStages[message.from] = "requestedServiceNumber";
+                userStage[message.from] = "requestedServiceNumber";
             }
-        } else if (userStages[message.from] === "requestedFullName") {
+        } else if (userStage[message.from] === "requestedFullName") {
             user.name = message.body.replace(/[^a-zA-Z ]/g, "");
 
             await prisma.users.update({
@@ -192,14 +198,14 @@ async function checkUserStages(user, message) {
 
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
-            userStages[message.from] = "requestedCPF";
+            userStage[message.from] = "requestedCPF";
         }
-    } else if (user.cpf === null) {
-        if (userStages[message.from] == undefined) {
+    } else if (user.cpf === FIELD_NOT_REGISTERED) {
+        if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
-            userStages[message.from] = "requestedCPF";
-        } else if (userStages[message.from] === "requestedCPF") {
+            userStage[message.from] = "requestedCPF";
+        } else if (userStage[message.from] === "requestedCPF") {
             user.cpf = message.body.replace(/[^\d]+/g, "");
 
             if (user.cpf.length != 11) {
@@ -222,22 +228,17 @@ async function checkUserStages(user, message) {
                     "Obrigado por informar seu CPF."
                 );
 
-                client.sendMessage(
-                    message.from,
-                    "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
-                );
+                sendServiceOptions(message);
 
-                userStages[message.from] = "requestedServiceNumber";
+                userStage[message.from] = "requestedServiceNumber";
             }
         }
-    } else if (userStages[message.from] == undefined) {
-        client.sendMessage(
-            message.from,
-            "Digite o número de alguns dos nossos serviços disponíveis:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
-        );
+    } else if (userStage[message.from] === USER_WITHOUT_SESSION) {
+        // User already registered, requesting service number.
+        sendServiceOptions(message);
 
-        userStages[message.from] = "requestedServiceNumber";
-    } else if (userStages[message.from] == "requestedServiceNumber") {
+        userStage[message.from] = "requestedServiceNumber";
+    } else if (userStage[message.from] === "requestedServiceNumber") {
         const listNumbersService = ["1", "2", "3", "4", "5"];
         const chosenNumber = message.body;
 
@@ -257,9 +258,16 @@ async function checkUserStages(user, message) {
                 "Aguarde alguns instantes que irei encaminha-lo para algum dos nossos atendentes, você será atendido em breve."
             );
 
-            userStages[message.from] = "in_attendance";
+            userStage[message.from] = "in_attendance";
         }
     }
+}
+
+function sendServiceOptions(message) {
+    client.sendMessage(
+        message.from,
+        "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
+    );
 }
 
 client.initialize();
