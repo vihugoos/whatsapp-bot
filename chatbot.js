@@ -54,7 +54,9 @@ client.on("message_create", (message) => {
 });
 
 async function identifyUserByPhoneNumber(message) {
-    if (message.from === "status@broadcast") return;
+    if (message.from === "status@broadcast") {
+        return;
+    }
 
     const phone_number = (await message.getContact()).number;
 
@@ -73,6 +75,8 @@ async function identifyUserByPhoneNumber(message) {
     }
 
     console.log("[chatbot-wpp]: User ID:", user.id);
+
+    console.log("[chatbot-wpp]: User stage:", userStage[message.from]);
 
     checkUserStage(user, message);
 }
@@ -114,7 +118,7 @@ async function checkUserStage(user, message) {
             if (messageFromUser === "sim") {
                 client.sendMessage(
                     message.from,
-                    "Apenas para confirmação, por gentiliza digite seu *CPF*."
+                    "Apenas para confirmação, por gentiliza digite seu *cpf*."
                 );
 
                 userStage[message.from] =
@@ -122,12 +126,12 @@ async function checkUserStage(user, message) {
             } else if (messageFromUser === "nao") {
                 client.sendMessage(
                     message.from,
-                    "Vamos dar prosseguimento no cadastro por aqui mesmo, iremos apenas precisar de algumas informações."
+                    "Vamos dar prosseguimento no cadastro por aqui mesmo, irei apenas precisar de algumas informações."
                 );
 
                 client.sendMessage(
                     message.from,
-                    "Digite seu *NOME* completo por favor."
+                    "Digite seu *nome* completo por favor."
                 );
 
                 userStage[message.from] = "requestedFullName";
@@ -143,7 +147,7 @@ async function checkUserStage(user, message) {
             if (user.cpf.length != 11) {
                 client.sendMessage(
                     message.from,
-                    "CPF inválido, por gentileza digite novamente."
+                    "CPF digitado incorretamente (não possui 11 dígitos), por gentileza digite novamente."
                 );
             } else {
                 previous_registration = await prisma.users.findFirst({
@@ -151,6 +155,25 @@ async function checkUserStage(user, message) {
                         cpf: user.cpf,
                     },
                 });
+
+                if (!previous_registration) {
+                    client.sendMessage(
+                        message.from,
+                        "Não encontrei esse CPF na nossa base de dados."
+                    );
+
+                    client.sendMessage(
+                        message.from,
+                        "Será necessário realizar um novo cadastro. Irei precisar de algumas informações."
+                    );
+
+                    client.sendMessage(
+                        message.from,
+                        "Por gentileza digite seu *nome* completo."
+                    );
+
+                    userStage[message.from] === "requestedFullName";
+                }
 
                 await prisma.users.delete({
                     where: {
@@ -165,6 +188,9 @@ async function checkUserStage(user, message) {
                     data: {
                         name: previous_registration.name,
                         cpf: previous_registration.cpf,
+                        rg: previous_registration.rg,
+                        email: previous_registration.email,
+                        crm: previous_registration.crm,
                     },
                 });
 
@@ -175,12 +201,19 @@ async function checkUserStage(user, message) {
                     }, seu novo número de celular foi atualizado com sucesso!`
                 );
 
+                client.sendMessage(
+                    message.from,
+                    "Você já está habilitado a requisitar nossos serviços novamente."
+                );
+
                 sendServiceOptions(message);
 
                 userStage[message.from] = "requestedServiceNumber";
             }
         } else if (userStage[message.from] === "requestedFullName") {
             user.name = message.body.replace(/[^a-zA-Z ]/g, "");
+
+            user.name = titleCase(user.name);
 
             await prisma.users.update({
                 where: {
@@ -196,7 +229,7 @@ async function checkUserStage(user, message) {
                 `Obrigado, ${user.name.split(" ")[0]}!`
             );
 
-            client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
+            client.sendMessage(message.from, "Digite seu *CPF*.");
 
             userStage[message.from] = "requestedCPF";
         }
@@ -223,9 +256,111 @@ async function checkUserStage(user, message) {
                     },
                 });
 
+                client.sendMessage(message.from, "Digite seu *RG*.");
+
+                userStage[message.from] = "requestedRG";
+            }
+        }
+    } else if (user.rg === FIELD_NOT_REGISTERED) {
+        if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(message.from, "Por gentiliza digite seu *RG*.");
+
+            userStage[message.from] = "requestedRG";
+        } else if (userStage[message.from] === "requestedRG") {
+            user.rg = message.body.replace(/[^\d]+/g, "");
+
+            if (user.rg.length != 9) {
                 client.sendMessage(
                     message.from,
-                    "Obrigado por informar seu CPF."
+                    "RG inválido, por gentileza digite novamente."
+                );
+            } else {
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        rg: user.rg,
+                    },
+                });
+
+                client.sendMessage(message.from, "Digite seu *email*.");
+
+                userStage[message.from] = "requestedEmail";
+            }
+        }
+    } else if (user.email === FIELD_NOT_REGISTERED) {
+        if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                "Por gentiliza digite seu *email*."
+            );
+
+            userStage[message.from] = "requestedEmail";
+        } else if (userStage[message.from] === "requestedEmail") {
+            const validateEmail = new RegExp(
+                "([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|[[\t -Z^-~]*])"
+            );
+
+            user.email = message.body.toLowerCase();
+
+            if (!validateEmail.test(user.email)) {
+                client.sendMessage(
+                    message.from,
+                    "Email inválido, por gentileza digite novamente."
+                );
+            } else {
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        email: user.email,
+                    },
+                });
+
+                client.sendMessage(
+                    message.from,
+                    "Digite seu *CRM* (apenas números)."
+                );
+
+                userStage[message.from] = "requestedCrm";
+            }
+        }
+    } else if (user.crm === FIELD_NOT_REGISTERED) {
+        if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                "Por gentiliza digite seu *CRM* (apenas números)."
+            );
+
+            userStage[message.from] = "requestedCrm";
+        } else if (userStage[message.from] === "requestedCrm") {
+            user.crm = message.body.replace(/[^\d]+/g, "");
+
+            if (user.crm.length != 6) {
+                client.sendMessage(
+                    message.from,
+                    "CRM inválido, por gentileza digite novamente."
+                );
+            } else {
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        crm: user.crm,
+                    },
+                });
+
+                client.sendMessage(
+                    message.from,
+                    "Cadastro realizado com sucesso!"
+                );
+
+                client.sendMessage(
+                    message.from,
+                    "Você já está habilitado a requisitar nossos serviços."
                 );
 
                 sendServiceOptions(message);
@@ -268,6 +403,10 @@ function sendServiceOptions(message) {
         message.from,
         "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
     );
+}
+
+function titleCase(str) {
+    return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
 }
 
 client.initialize();
