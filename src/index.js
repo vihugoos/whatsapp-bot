@@ -49,6 +49,19 @@ client.on("message_create", (message) => {
 
             console.log(`\n[bot-wpp]: Attendance ended for ${message.to}`);
         }
+
+        if (message.body.toLowerCase().includes("prosseguimento no cadastro")) {
+            userStage[message.to] = "requestedFullName";
+
+            client.sendMessage(
+                message.to,
+                "Por gentileza digite seu *nome* completo."
+            );
+
+            console.log(
+                `\n[bot-wpp]: Client unlocked for payment: ${message.to}`
+            );
+        }
     }
 });
 
@@ -88,12 +101,12 @@ async function checkUserStage(user, message) {
                 message.from,
                 `Olá ${
                     user.name.split(" ")[0]
-                }, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento.`
+                }, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎`
             );
         } else {
             client.sendMessage(
                 message.from,
-                "Olá, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento."
+                "Olá, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎"
             );
         }
     }
@@ -108,9 +121,8 @@ async function checkUserStage(user, message) {
             const buttons = new Buttons(
                 "Selecione uma das opções abaixo.",
                 [
-                    { body: "Já possuo um cadastro." },
-                    { body: "Não possuo cadastro." },
-                    { body: "Falar com atendente comercial." },
+                    { body: "Já sou cliente Liber." },
+                    { body: "Não sou cliente." },
                 ],
                 "Pré-atendimento Automático",
                 "Liber Assessoria & Soluções"
@@ -124,7 +136,7 @@ async function checkUserStage(user, message) {
             userStage[message.from] ===
             "askedIfAlreadyRegisteredOrChatWithAttendant"
         ) {
-            if (message.body === "Já possuo um cadastro.") {
+            if (message.body === "Já sou cliente Liber.") {
                 client.sendMessage(
                     message.from,
                     "Apenas para confirmação, por gentiliza digite seu *cpf*."
@@ -132,22 +144,10 @@ async function checkUserStage(user, message) {
 
                 userStage[message.from] =
                     "requestedCPFToConfirmPreviousRegistration";
-            } else if (message.body === "Não possuo cadastro.") {
+            } else if (message.body === "Não sou cliente.") {
                 client.sendMessage(
                     message.from,
-                    "Vamos dar prosseguimento no cadastro por aqui mesmo, irei apenas precisar de algumas informações."
-                );
-
-                client.sendMessage(
-                    message.from,
-                    "Digite seu *nome* completo por favor."
-                );
-
-                userStage[message.from] = "requestedFullName";
-            } else if (message.body === "Falar com atendente comercial.") {
-                client.sendMessage(
-                    message.from,
-                    "Aguarde alguns instantes que irei encaminha-lo para o nosso representante comercial."
+                    "Por favor, aguarde alguns instantes que irei encaminha-lo para algum de nossos representantes comerciais."
                 );
 
                 userStage[message.from] = "in_attendance";
@@ -183,15 +183,10 @@ async function checkUserStage(user, message) {
 
                     client.sendMessage(
                         message.from,
-                        "Será necessário realizar um novo cadastro. Irei precisar de algumas informações."
+                        "Por favor, aguarde alguns instantes que irei encaminha-lo a um de nossos atendentes para melhor análise do caso."
                     );
 
-                    client.sendMessage(
-                        message.from,
-                        "Por gentileza digite seu *nome* completo."
-                    );
-
-                    userStage[message.from] = "requestedFullName";
+                    userStage[message.from] = "in_attendance";
                 } else {
                     await prisma.users.delete({
                         where: {
