@@ -35,9 +35,9 @@ client.on("disconnected", (reason) => {
 });
 
 client.on("message", async (message) => {
-    console.log("[bot-wpp]: User stage:", userStage[message.from]);
+    console.log("\n[bot-wpp]: User stage:", userStage[message.from]);
 
-    console.log(`\n[bot-wpp]: New message from ${message.from}:`, message.body);
+    console.log(`[bot-wpp]: Message from ${message.from}:`, message.body);
 
     identifyUserByPhoneNumber(message);
 });
@@ -238,6 +238,11 @@ async function checkUserStage(user, message) {
         }
     } else if (user.cpf === FIELD_NOT_REGISTERED) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                `${user.name}, vamos continuar com o seu cadastro.`
+            );
+
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
 
             userStage[message.from] = "requestedCPF";
@@ -266,6 +271,11 @@ async function checkUserStage(user, message) {
         }
     } else if (user.rg === FIELD_NOT_REGISTERED) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                `${user.name}, vamos continuar com o seu cadastro.`
+            );
+
             client.sendMessage(message.from, "Por gentiliza digite seu *RG*.");
 
             userStage[message.from] = "requestedRG";
@@ -294,6 +304,11 @@ async function checkUserStage(user, message) {
         }
     } else if (user.email === FIELD_NOT_REGISTERED) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                `${user.name}, vamos continuar com o seu cadastro.`
+            );
+
             client.sendMessage(
                 message.from,
                 "Por gentiliza digite seu *email*."
@@ -332,6 +347,11 @@ async function checkUserStage(user, message) {
         }
     } else if (user.crm === FIELD_NOT_REGISTERED) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                `${user.name}, vamos continuar com o seu cadastro.`
+            );
+
             client.sendMessage(
                 message.from,
                 "Por gentiliza digite seu *CRM* (apenas números)."
