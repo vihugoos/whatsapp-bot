@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require("whatsapp-web.js");
+const { Client, LocalAuth, Buttons, List } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
 const prisma = require("./database/prisma-client");
@@ -64,6 +64,8 @@ async function identifyUserByPhoneNumber(message) {
     });
 
     if (!user) {
+        console.log("\n[bot-wpp]: User does not exists, creating...");
+
         user = await prisma.users.create({
             data: {
                 phone_number,
@@ -86,12 +88,12 @@ async function checkUserStage(user, message) {
                 message.from,
                 `Olá ${
                     user.name.split(" ")[0]
-                }, eu sou a assistente virtual da Liber, estou aqui para auxiliá-lo(a) no seu atendimento.`
+                }, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento.`
             );
         } else {
             client.sendMessage(
                 message.from,
-                "Olá, eu sou a assistente virtual da Liber, estou aqui para auxiliá-lo(a) no seu atendimento."
+                "Olá, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento."
             );
         }
     }
@@ -103,19 +105,26 @@ async function checkUserStage(user, message) {
                 "Verifiquei que esse número não está cadastrado em nosso sistema."
             );
 
-            client.sendMessage(
-                message.from,
-                "Já possui um cadastro anterior? Digite *'sim'* ou *'não'*."
+            const buttons = new Buttons(
+                "Selecione uma das opções abaixo.",
+                [
+                    { body: "Já possuo um cadastro." },
+                    { body: "Não possuo cadastro." },
+                    { body: "Falar com atendente comercial." },
+                ],
+                "Pré-atendimento Automático",
+                "Liber Assessoria & Soluções"
             );
 
-            userStage[message.from] = "askedIfAlreadyRegistered";
-        } else if (userStage[message.from] === "askedIfAlreadyRegistered") {
-            let messageFromUser = message.body
-                .replace(/[ìí]/gi, "i")
-                .replace(/[ã]/gi, "a")
-                .toLowerCase();
+            client.sendMessage(message.from, buttons);
 
-            if (messageFromUser === "sim") {
+            userStage[message.from] =
+                "askedIfAlreadyRegisteredOrChatWithAttendant";
+        } else if (
+            userStage[message.from] ===
+            "askedIfAlreadyRegisteredOrChatWithAttendant"
+        ) {
+            if (message.body === "Já possuo um cadastro.") {
                 client.sendMessage(
                     message.from,
                     "Apenas para confirmação, por gentiliza digite seu *cpf*."
@@ -123,7 +132,7 @@ async function checkUserStage(user, message) {
 
                 userStage[message.from] =
                     "requestedCPFToConfirmPreviousRegistration";
-            } else if (messageFromUser === "nao") {
+            } else if (message.body === "Não possuo cadastro.") {
                 client.sendMessage(
                     message.from,
                     "Vamos dar prosseguimento no cadastro por aqui mesmo, irei apenas precisar de algumas informações."
@@ -135,10 +144,17 @@ async function checkUserStage(user, message) {
                 );
 
                 userStage[message.from] = "requestedFullName";
+            } else if (message.body === "Falar com atendente comercial.") {
+                client.sendMessage(
+                    message.from,
+                    "Aguarde alguns instantes que irei encaminha-lo para o nosso representante comercial."
+                );
+
+                userStage[message.from] = "in_attendance";
             } else {
                 client.sendMessage(
                     message.from,
-                    "Resposta inválida, tente novamente."
+                    "Resposta inválida, por gentileza selecione uma das opções acima."
                 );
             }
         } else if (
@@ -397,7 +413,7 @@ async function checkUserStage(user, message) {
 
         userStage[message.from] = "requestedServiceNumber";
     } else if (userStage[message.from] === "requestedServiceNumber") {
-        const listNumbersService = ["1", "2", "3", "4", "5"];
+        const listNumbersService = ["1", "2", "3", "4", "5", "6"];
         const chosenNumber = message.body;
 
         if (!listNumbersService.includes(chosenNumber)) {
@@ -413,7 +429,17 @@ async function checkUserStage(user, message) {
 
             client.sendMessage(
                 message.from,
-                "Aguarde alguns instantes que irei encaminha-lo para algum dos nossos atendentes, você será atendido em breve."
+                "Aguarde alguns instantes que irei encaminha-lo para algum de nossos atendentes, você será atendido em breve."
+            );
+
+            client.sendMessage(
+                message.from,
+                "Caso seja possível, já pode ir nos adiantando com mais detalhes sua requisição."
+            );
+
+            client.sendMessage(
+                message.from,
+                "Fique a vontade também para enviar um áudio caso preferir."
             );
 
             userStage[message.from] = "in_attendance";
@@ -424,7 +450,7 @@ async function checkUserStage(user, message) {
 function sendServiceOptions(message) {
     client.sendMessage(
         message.from,
-        "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
+        "Digite o número do serviço desejado:\n\n*1*. Veículo\n*2*. Casa\n*3*. Atualizações\n*4*. Viagens\n*5*. Cancelamentos & Assinaturas\n*6*. Agendamentos"
     );
 }
 
