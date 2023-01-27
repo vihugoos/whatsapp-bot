@@ -1,8 +1,8 @@
-const { PrismaClient } = require("@prisma/client");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
-const prisma = new PrismaClient();
+const prisma = require("./database/prisma-client");
+const convertToTitleCase = require("./utils/convertToTitleCase");
 
 var userStage = [];
 
@@ -19,26 +19,25 @@ client.on("qr", (qr) => {
 });
 
 client.on("authenticated", () => {
-    console.log("\n[chatbot-wpp]: Client is authenticated.");
+    console.log("\n[bot-wpp]: Client is authenticated.");
 });
 
 client.on("auth_failure", (msg) => {
-    console.error("\n[chatbot-wpp]: Authentication Failure:", msg);
+    console.error("\n[bot-wpp]: Authentication Failure:", msg);
 });
 
 client.on("ready", () => {
-    console.log("\n[chatbot-wpp]: Client connected successfully.");
+    console.log("\n[bot-wpp]: Client connected successfully.");
 });
 
 client.on("disconnected", (reason) => {
-    console.log("\n[chatbot-wpp]: Client was logged out.", reason);
+    console.log("\n[bot-wpp]: Client was logged out.", reason);
 });
 
 client.on("message", async (message) => {
-    console.log(
-        `\n[chatbot-wpp]: New message from ${message.from}:`,
-        message.body
-    );
+    console.log("[bot-wpp]: User stage:", userStage[message.from]);
+
+    console.log(`\n[bot-wpp]: New message from ${message.from}:`, message.body);
 
     identifyUserByPhoneNumber(message);
 });
@@ -48,15 +47,13 @@ client.on("message_create", (message) => {
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
             userStage[message.to] = undefined;
 
-            console.log(`\n[chatbot-wpp]: Attendance ended for ${message.to}`);
+            console.log(`\n[bot-wpp]: Attendance ended for ${message.to}`);
         }
     }
 });
 
 async function identifyUserByPhoneNumber(message) {
-    if (message.from === "status@broadcast") {
-        return;
-    }
+    if (message.from === "status@broadcast") return;
 
     const phone_number = (await message.getContact()).number;
 
@@ -74,9 +71,7 @@ async function identifyUserByPhoneNumber(message) {
         });
     }
 
-    console.log("[chatbot-wpp]: User ID:", user.id);
-
-    console.log("[chatbot-wpp]: User stage:", userStage[message.from]);
+    console.log("[bot-wpp]: User ID:", user.id);
 
     checkUserStage(user, message);
 }
@@ -103,6 +98,11 @@ async function checkUserStage(user, message) {
 
     if (user.name === FIELD_NOT_REGISTERED) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                "Verifiquei que esse número não está cadastrado em nosso sistema."
+            );
+
             client.sendMessage(
                 message.from,
                 "Já possui um cadastro anterior? Digite *'sim'* ou *'não'*."
@@ -136,7 +136,10 @@ async function checkUserStage(user, message) {
 
                 userStage[message.from] = "requestedFullName";
             } else {
-                console.log("Reposta inválida, por favor, tente novamente.");
+                client.sendMessage(
+                    message.from,
+                    "Resposta inválida, tente novamente."
+                );
             }
         } else if (
             userStage[message.from] ===
@@ -159,7 +162,7 @@ async function checkUserStage(user, message) {
                 if (!previous_registration) {
                     client.sendMessage(
                         message.from,
-                        "Não encontrei esse CPF na nossa base de dados."
+                        "Não encontrei esse CPF no nosso sistema."
                     );
 
                     client.sendMessage(
@@ -172,48 +175,48 @@ async function checkUserStage(user, message) {
                         "Por gentileza digite seu *nome* completo."
                     );
 
-                    userStage[message.from] === "requestedFullName";
+                    userStage[message.from] = "requestedFullName";
+                } else {
+                    await prisma.users.delete({
+                        where: {
+                            id: previous_registration.id,
+                        },
+                    });
+
+                    user = await prisma.users.update({
+                        where: {
+                            phone_number: user.phone_number,
+                        },
+                        data: {
+                            name: previous_registration.name,
+                            cpf: previous_registration.cpf,
+                            rg: previous_registration.rg,
+                            email: previous_registration.email,
+                            crm: previous_registration.crm,
+                        },
+                    });
+
+                    client.sendMessage(
+                        message.from,
+                        `${
+                            user.name.split(" ")[0]
+                        }, seu novo número de celular foi atualizado com sucesso!`
+                    );
+
+                    client.sendMessage(
+                        message.from,
+                        "Você já está habilitado a requisitar nossos serviços novamente."
+                    );
+
+                    sendServiceOptions(message);
+
+                    userStage[message.from] = "requestedServiceNumber";
                 }
-
-                await prisma.users.delete({
-                    where: {
-                        id: previous_registration.id,
-                    },
-                });
-
-                user = await prisma.users.update({
-                    where: {
-                        phone_number: user.phone_number,
-                    },
-                    data: {
-                        name: previous_registration.name,
-                        cpf: previous_registration.cpf,
-                        rg: previous_registration.rg,
-                        email: previous_registration.email,
-                        crm: previous_registration.crm,
-                    },
-                });
-
-                client.sendMessage(
-                    message.from,
-                    `${
-                        user.name.split(" ")[0]
-                    }, seu novo número de celular foi atualizado com sucesso!`
-                );
-
-                client.sendMessage(
-                    message.from,
-                    "Você já está habilitado a requisitar nossos serviços novamente."
-                );
-
-                sendServiceOptions(message);
-
-                userStage[message.from] = "requestedServiceNumber";
             }
         } else if (userStage[message.from] === "requestedFullName") {
             user.name = message.body.replace(/[^a-zA-Z ]/g, "");
 
-            user.name = titleCase(user.name);
+            user.name = convertToTitleCase(user.name);
 
             await prisma.users.update({
                 where: {
@@ -403,10 +406,6 @@ function sendServiceOptions(message) {
         message.from,
         "Digite o número do serviço desejado:\n\n*1*. Serviço A\n*2*. Serviço B\n*3*. Serviço C\n*4*. Serviço D\n*5*. Serviço E"
     );
-}
-
-function titleCase(str) {
-    return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
 }
 
 client.initialize();
