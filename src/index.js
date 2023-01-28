@@ -16,10 +16,8 @@ const client = new Client({
 
 client.initialize();
 
-client.on("loading_screen", (percent, message) => {
-    console.log(
-        `\n[bot-wpp]: Loading screen... ${percent}% percent, ${message} message.`
-    );
+client.on("loading_screen", (percent) => {
+    console.log(`\n[wpp-bot]: Loading screen... ${percent}% percent`);
 });
 
 client.on("qr", (qr) => {
@@ -27,22 +25,18 @@ client.on("qr", (qr) => {
 });
 
 client.on("authenticated", () => {
-    console.log("\n[bot-wpp]: Client is authenticated.");
+    console.log("\n[wpp-bot]: Client is authenticated");
 });
 
 client.on("auth_failure", (msg) => {
-    console.error("\n[bot-wpp]: Authentication Failure:", msg);
+    console.error("\n[wpp-bot]: Authentication failure:", msg);
 });
 
 client.on("ready", () => {
-    console.log("\n[bot-wpp]: Client connected successfully.");
+    console.log("\n[wpp-bot]: Client connected successfully");
 });
 
 client.on("message", async (message) => {
-    console.log("\n[bot-wpp]: User stage:", userStage[message.from]);
-
-    console.log(`[bot-wpp]: Message from ${message.from}:`, message.body);
-
     identifyUserByPhoneNumber(message);
 });
 
@@ -51,7 +45,7 @@ client.on("message_create", (message) => {
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
             userStage[message.to] = undefined;
 
-            console.log(`\n[bot-wpp]: Attendance ended for ${message.to}`);
+            console.log(`\n[wpp-bot]: Attendance ended for ${message.to}`);
 
             const satisfactionSurvey = new Buttons(
                 "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
@@ -63,7 +57,7 @@ client.on("message_create", (message) => {
             client.sendMessage(message.to, satisfactionSurvey);
 
             console.log(
-                `\n[bot-wpp]: Satisfaction survey sent to ${message.to}`
+                `\n[wpp-bot]: Satisfaction survey sent to ${message.to}`
             );
         }
 
@@ -80,28 +74,36 @@ client.on("message_create", (message) => {
             );
 
             console.log(
-                `\n[bot-wpp]: Client unlocked for registration: ${message.to}`
+                `\n[wpp-bot]: Client unlocked for registration: ${message.to}`
             );
         }
     }
 });
 
-client.on("message_revoke_everyone", async (after, before) => {
-    console.log("\n[bot-wpp]: Message deleted, after:", after);
-
+client.on("message_revoke_everyone", async (before) => {
     if (before) {
-        console.log("[bot-wpp]: Message deleted, before:", before);
+        if (before.from === "status@broadcast") return;
+
+        console.log("\n[wpp-bot]: Message deleted:", {
+            fromMe: before.fromMe,
+            from: before.from,
+            notifyName: before.notifyName,
+            author: before.author,
+            type: before.type,
+            body: before.body,
+            isStatus: before.isStatus,
+        });
     }
 });
 
 client.on("group_join", (notification) => {
-    console.log("\n[bot-wpp]: bot joined the group:", notification);
+    console.log("\n[wpp-bot]: bot joined the group:", notification);
 });
 
 client.on("call", async (call) => {
     let rejectCalls = true;
 
-    console.log("\n[bot-wpp]: Call received, rejecting:", call);
+    console.log("\n[wpp-bot]: Call received, rejecting:", call);
 
     if (rejectCalls) await call.reject();
 
@@ -117,15 +119,19 @@ client.on("call", async (call) => {
 });
 
 client.on("change_state", (state) => {
-    console.log("\n[bot-wpp]: Changed state, new status connection:", state);
+    console.log("\n[wpp-bot]: Changed state, new status connection:", state);
 });
 
 client.on("disconnected", (reason) => {
-    console.log("\n[bot-wpp]: Client was logged out.", reason);
+    console.log("\n[wpp-bot]: Client was logged out", reason);
 });
 
 async function identifyUserByPhoneNumber(message) {
     if (message.from === "status@broadcast") return;
+
+    console.log("\n[wpp-bot]: User stage:", userStage[message.from]);
+
+    console.log(`[wpp-bot]: Message from ${message.from}:`, message.body);
 
     const phone_number = (await message.getContact()).number;
 
@@ -136,7 +142,7 @@ async function identifyUserByPhoneNumber(message) {
     });
 
     if (!user) {
-        console.log("\n[bot-wpp]: User does not exists, creating...");
+        console.log("\n[wpp-bot]: User does not exists, creating...");
 
         user = await prisma.users.create({
             data: {
@@ -145,7 +151,7 @@ async function identifyUserByPhoneNumber(message) {
         });
     }
 
-    console.log("[bot-wpp]: User ID:", user.id);
+    console.log("[wpp-bot]: User ID:", user.id);
 
     checkUserStage(user, message);
 }
@@ -160,22 +166,22 @@ async function checkUserStage(user, message) {
             switch (message.body) {
                 case "Ruim":
                     console.log(
-                        "\n[bot-wpp]: Satisfaction survey, user answered 'ruim'."
+                        "\n[wpp-bot]: Satisfaction survey, user answered 'ruim'"
                     );
                     return;
                 case "Mediano":
                     console.log(
-                        "\n[bot-wpp]: Satisfaction survey, user answered 'mediano'."
+                        "\n[wpp-bot]: Satisfaction survey, user answered 'mediano'"
                     );
                     return;
                 case "Muito bom":
                     console.log(
-                        "\n[bot-wpp]: Satisfaction survey, user answered 'muito bom'."
+                        "\n[wpp-bot]: Satisfaction survey, user answered 'muito bom'"
                     );
                     return;
                 default:
                     console.log(
-                        "\n[bot-wpp]: Satisfaction survey, response not found!"
+                        "\n[wpp-bot]: Satisfaction survey, response not found!"
                     );
             }
         }
