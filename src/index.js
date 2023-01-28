@@ -1,4 +1,4 @@
-const { Client, LocalAuth, Buttons, List } = require("whatsapp-web.js");
+const { Client, LocalAuth, Buttons } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
 const prisma = require("./database/prisma-client");
@@ -48,6 +48,19 @@ client.on("message_create", (message) => {
             userStage[message.to] = undefined;
 
             console.log(`\n[bot-wpp]: Attendance ended for ${message.to}`);
+
+            const satisfactionSurvey = new Buttons(
+                "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
+                [{ body: "Ruim" }, { body: "Mediano" }, { body: "Muito bom" }],
+                "Pesquisa de Satisfação",
+                "Liber Assessoria & Soluções"
+            );
+
+            client.sendMessage(message.to, satisfactionSurvey);
+
+            console.log(
+                `\n[bot-wpp]: Satisfaction survey sent to ${message.to}`
+            );
         }
 
         if (
@@ -100,6 +113,31 @@ async function checkUserStage(user, message) {
     const FIELD_NOT_REGISTERED = null;
 
     if (userStage[message.from] === USER_WITHOUT_SESSION) {
+        // Verify if user answered satisfaction survey
+        if (message.hasQuotedMsg) {
+            switch (message.body) {
+                case "Ruim":
+                    console.log(
+                        "\n[bot-wpp]: Satisfaction survey, user answered 'ruim'."
+                    );
+                    return;
+                case "Mediano":
+                    console.log(
+                        "\n[bot-wpp]: Satisfaction survey, user answered 'mediano'."
+                    );
+                    return;
+                case "Muito bom":
+                    console.log(
+                        "\n[bot-wpp]: Satisfaction survey, user answered 'muito bom'."
+                    );
+                    return;
+                default:
+                    console.log(
+                        "\n[bot-wpp]: Satisfaction survey, response not found!"
+                    );
+            }
+        }
+
         if (user.name) {
             client.sendMessage(
                 message.from,
