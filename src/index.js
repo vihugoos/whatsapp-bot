@@ -14,6 +14,8 @@ const client = new Client({
     },
 });
 
+client.initialize();
+
 client.on("qr", (qr) => {
     qrcode.generate(qr, { small: true });
 });
@@ -477,5 +479,3 @@ function sendServiceOptions(message) {
         "Digite o número do serviço desejado:\n\n*1*. Veículo\n*2*. Casa\n*3*. Atualizações\n*4*. Viagens\n*5*. Cancelamentos & Assinaturas\n*6*. Agendamentos"
     );
 }
-
-client.initialize();
