@@ -1,5 +1,5 @@
 {
-  "name": "bot-wpp",
+  "name": "wpp-bot",
   "version": "1.0.0",
   "description": "Liber's wpp bot.",
   "main": "src/index.js",
