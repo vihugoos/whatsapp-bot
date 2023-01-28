@@ -50,7 +50,11 @@ client.on("message_create", (message) => {
             console.log(`\n[bot-wpp]: Attendance ended for ${message.to}`);
         }
 
-        if (message.body.toLowerCase().includes("prosseguimento no cadastro")) {
+        if (
+            message.body
+                .toLowerCase()
+                .includes("prosseguimento no seu cadastro")
+        ) {
             userStage[message.to] = "requestedFullName";
 
             client.sendMessage(
@@ -59,7 +63,7 @@ client.on("message_create", (message) => {
             );
 
             console.log(
-                `\n[bot-wpp]: Client unlocked for payment: ${message.to}`
+                `\n[bot-wpp]: Client unlocked for registration: ${message.to}`
             );
         }
     }
@@ -101,12 +105,12 @@ async function checkUserStage(user, message) {
                 message.from,
                 `Olá ${
                     user.name.split(" ")[0]
-                }, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎`
+                }, tudo bem? Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎`
             );
         } else {
             client.sendMessage(
                 message.from,
-                "Olá, tudo bem?! Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎"
+                "Olá, tudo bem? Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎"
             );
         }
     }
@@ -120,23 +124,16 @@ async function checkUserStage(user, message) {
 
             const buttons = new Buttons(
                 "Selecione uma das opções abaixo.",
-                [
-                    { body: "Já sou cliente Liber." },
-                    { body: "Não sou cliente." },
-                ],
+                [{ body: "Já sou cliente Liber" }, { body: "Não sou cliente" }],
                 "Pré-atendimento Automático",
                 "Liber Assessoria & Soluções"
             );
 
             client.sendMessage(message.from, buttons);
 
-            userStage[message.from] =
-                "askedIfAlreadyRegisteredOrChatWithAttendant";
-        } else if (
-            userStage[message.from] ===
-            "askedIfAlreadyRegisteredOrChatWithAttendant"
-        ) {
-            if (message.body === "Já sou cliente Liber.") {
+            userStage[message.from] = "askedIfAlreadyClientLiber";
+        } else if (userStage[message.from] === "askedIfAlreadyClientLiber") {
+            if (message.body === "Já sou cliente Liber") {
                 client.sendMessage(
                     message.from,
                     "Apenas para confirmação, por gentiliza digite seu *cpf*."
@@ -144,10 +141,10 @@ async function checkUserStage(user, message) {
 
                 userStage[message.from] =
                     "requestedCPFToConfirmPreviousRegistration";
-            } else if (message.body === "Não sou cliente.") {
+            } else if (message.body === "Não sou cliente") {
                 client.sendMessage(
                     message.from,
-                    "Por favor, aguarde alguns instantes que irei encaminha-lo para algum de nossos representantes comerciais."
+                    "Aguarde alguns instantes por favor, que irei encaminhá-lo(a) para o nosso representante comercial."
                 );
 
                 userStage[message.from] = "in_attendance";
@@ -348,10 +345,7 @@ async function checkUserStage(user, message) {
                     },
                 });
 
-                client.sendMessage(
-                    message.from,
-                    "Digite seu *CRM* (apenas números)."
-                );
+                client.sendMessage(message.from, "Digite seu *CRM*.");
 
                 userStage[message.from] = "requestedCrm";
             }
@@ -363,10 +357,7 @@ async function checkUserStage(user, message) {
                 `${user.name}, vamos continuar com o seu cadastro.`
             );
 
-            client.sendMessage(
-                message.from,
-                "Por gentiliza digite seu *CRM* (apenas números)."
-            );
+            client.sendMessage(message.from, "Por gentiliza digite seu *CRM*.");
 
             userStage[message.from] = "requestedCrm";
         } else if (userStage[message.from] === "requestedCrm") {
@@ -424,7 +415,7 @@ async function checkUserStage(user, message) {
 
             client.sendMessage(
                 message.from,
-                "Aguarde alguns instantes que irei encaminha-lo para algum de nossos atendentes, você será atendido em breve."
+                "Aguarde alguns instantes que irei encaminhar para algum de nossos atendentes, você será atendido em breve."
             );
 
             client.sendMessage(
