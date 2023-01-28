@@ -16,6 +16,12 @@ const client = new Client({
 
 client.initialize();
 
+client.on("loading_screen", (percent, message) => {
+    console.log(
+        `\n[bot-wpp]: Loading screen... ${percent}% percent, ${message} message.`
+    );
+});
+
 client.on("qr", (qr) => {
     qrcode.generate(qr, { small: true });
 });
@@ -30,10 +36,6 @@ client.on("auth_failure", (msg) => {
 
 client.on("ready", () => {
     console.log("\n[bot-wpp]: Client connected successfully.");
-});
-
-client.on("disconnected", (reason) => {
-    console.log("\n[bot-wpp]: Client was logged out.", reason);
 });
 
 client.on("message", async (message) => {
@@ -82,6 +84,44 @@ client.on("message_create", (message) => {
             );
         }
     }
+});
+
+client.on("message_revoke_everyone", async (after, before) => {
+    console.log("\n[bot-wpp]: Message deleted, after:", after);
+
+    if (before) {
+        console.log("[bot-wpp]: Message deleted, before:", before);
+    }
+});
+
+client.on("group_join", (notification) => {
+    console.log("\n[bot-wpp]: bot joined the group:", notification);
+});
+
+client.on("call", async (call) => {
+    let rejectCalls = true;
+
+    console.log("\n[bot-wpp]: Call received, rejecting:", call);
+
+    if (rejectCalls) await call.reject();
+
+    await client.sendMessage(
+        call.from,
+        "Ops, nós não aceitamos calls por essa conta!"
+    );
+
+    await client.sendMessage(
+        call.from,
+        "Todo nosso contato é feito apenas via chat."
+    );
+});
+
+client.on("change_state", (state) => {
+    console.log("\n[bot-wpp]: Changed state, new status connection:", state);
+});
+
+client.on("disconnected", (reason) => {
+    console.log("\n[bot-wpp]: Client was logged out.", reason);
 });
 
 async function identifyUserByPhoneNumber(message) {
