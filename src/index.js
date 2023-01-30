@@ -581,7 +581,7 @@ async function checkUserStage(user, message) {
             const newSolicitation = await prisma.solicitations.create({
                 data: {
                     user_id: user.id,
-                    servico: listServices[chosenNumber - 1],
+                    service: listServices[chosenNumber - 1],
                 },
             });
 
