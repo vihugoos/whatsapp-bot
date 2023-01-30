@@ -178,6 +178,8 @@ async function checkUserStage(user, message) {
     if (userStage[message.from] === USER_WITHOUT_SESSION) {
         // Verify if user answered satisfaction survey
         if (message.hasQuotedMsg) {
+            let answer;
+
             switch (message.body) {
                 case "Ruim":
                     console.log(
@@ -185,6 +187,16 @@ async function checkUserStage(user, message) {
                             user.name.split(" ")[0]
                         } answered 'ruim'`
                     );
+
+                    answer = await prisma.surveys.create({
+                        data: {
+                            user_id: user.id,
+                            answer: "ruim",
+                        },
+                    });
+
+                    console.log("[bot-wpp]: Survey ID:", answer.id);
+
                     return;
                 case "Mediano":
                     console.log(
@@ -192,6 +204,16 @@ async function checkUserStage(user, message) {
                             user.name.split(" ")[0]
                         } answered 'mediano'`
                     );
+
+                    answer = await prisma.surveys.create({
+                        data: {
+                            user_id: user.id,
+                            answer: "mediano",
+                        },
+                    });
+
+                    console.log("[bot-wpp]: Survey ID:", answer.id);
+
                     return;
                 case "Muito bom":
                     console.log(
@@ -199,10 +221,20 @@ async function checkUserStage(user, message) {
                             user.name.split(" ")[0]
                         } answered 'muito bom'`
                     );
+
+                    answer = await prisma.surveys.create({
+                        data: {
+                            user_id: user.id,
+                            answer: "muito bom",
+                        },
+                    });
+
+                    console.log("[bot-wpp]: Survey ID:", answer.id);
+
                     return;
                 default:
                     console.log(
-                        "\n[wpp-bot]: Satisfaction survey, response not found!"
+                        "\n[wpp-bot]: Satisfaction survey, answer not found!"
                     );
             }
         }
