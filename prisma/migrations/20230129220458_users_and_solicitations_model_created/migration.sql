@@ -11,6 +11,18 @@ CREATE TABLE "users" (
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "solicitations" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "servico" TEXT NOT NULL,
+    "open" BOOLEAN NOT NULL DEFAULT true,
+    "start_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "end_at" TIMESTAMP(3),
+
+    CONSTRAINT "solicitations_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_cpf_key" ON "users"("cpf");
 
@@ -25,3 +37,6 @@ CREATE UNIQUE INDEX "users_crm_key" ON "users"("crm");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_phone_number_key" ON "users"("phone_number");
+
+-- AddForeignKey
+ALTER TABLE "solicitations" ADD CONSTRAINT "solicitations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
