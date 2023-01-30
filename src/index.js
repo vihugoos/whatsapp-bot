@@ -43,37 +43,60 @@ client.on("message", async (message) => {
 client.on("message_create", async (message) => {
     if (message.fromMe) {
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
-            const solicitationId = userStage[message.to];
+            console.log("\n[wpp-bot]: Function attendance ended called");
 
-            const solicitationClosed = await prisma.solicitations.update({
+            const phone_number = message.to.replace(/[^\d]+/g, "");
+
+            const user = await prisma.users.findFirst({
                 where: {
-                    id: solicitationId,
-                },
-                data: {
-                    open: false,
-                    end_at: new Date(),
+                    phone_number,
                 },
             });
 
-            console.log("\n[wpp-bot]: Solicitation closed");
-            console.log("[wpp-bot]: Solicitation ID:", solicitationClosed.id);
+            if (user.cpf) {
+                const solicitationId = userStage[message.to];
+
+                const solicitationClosed = await prisma.solicitations.update({
+                    where: {
+                        id: solicitationId,
+                    },
+                    data: {
+                        open: false,
+                        end_at: new Date(),
+                    },
+                });
+
+                console.log("\n[wpp-bot]: Solicitation closed");
+                console.log(
+                    "[wpp-bot]: Solicitation ID:",
+                    solicitationClosed.id
+                );
+
+                const satisfactionSurvey = new Buttons(
+                    "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
+                    [
+                        { body: "Ruim" },
+                        { body: "Mediano" },
+                        { body: "Muito bom" },
+                    ],
+                    "Pesquisa de Satisfação",
+                    "Liber Assessoria & Soluções"
+                );
+
+                client.sendMessage(message.to, satisfactionSurvey);
+
+                console.log(
+                    `\n[wpp-bot]: Satisfaction survey sent to ${message.to}`
+                );
+            } else {
+                console.log(
+                    "\n[wpp-bot]: User does not have a registered account"
+                );
+            }
 
             userStage[message.to] = undefined;
 
             console.log(`\n[wpp-bot]: Attendance ended for ${message.to}`);
-
-            const satisfactionSurvey = new Buttons(
-                "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
-                [{ body: "Ruim" }, { body: "Mediano" }, { body: "Muito bom" }],
-                "Pesquisa de Satisfação",
-                "Liber Assessoria & Soluções"
-            );
-
-            client.sendMessage(message.to, satisfactionSurvey);
-
-            console.log(
-                `\n[wpp-bot]: Satisfaction survey sent to ${message.to}`
-            );
         }
 
         if (
