@@ -40,9 +40,24 @@ client.on("message", async (message) => {
     identifyUserByPhoneNumber(message);
 });
 
-client.on("message_create", (message) => {
+client.on("message_create", async (message) => {
     if (message.fromMe) {
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
+            const solicitationId = userStage[message.to];
+
+            const solicitationClosed = await prisma.solicitations.update({
+                where: {
+                    id: solicitationId,
+                },
+                data: {
+                    open: false,
+                    end_at: new Date(),
+                },
+            });
+
+            console.log("\n[wpp-bot]: Solicitation closed");
+            console.log("[wpp-bot]: Solicitation ID:", solicitationClosed.id);
+
             userStage[message.to] = undefined;
 
             console.log(`\n[wpp-bot]: Attendance ended for ${message.to}`);
@@ -166,17 +181,23 @@ async function checkUserStage(user, message) {
             switch (message.body) {
                 case "Ruim":
                     console.log(
-                        "\n[wpp-bot]: Satisfaction survey, user answered 'ruim'"
+                        `\n[wpp-bot]: Satisfaction survey, ${
+                            user.name.split(" ")[0]
+                        } answered 'ruim'`
                     );
                     return;
                 case "Mediano":
                     console.log(
-                        "\n[wpp-bot]: Satisfaction survey, user answered 'mediano'"
+                        `\n[wpp-bot]: Satisfaction survey, ${
+                            user.name.split(" ")[0]
+                        } answered 'mediano'`
                     );
                     return;
                 case "Muito bom":
                     console.log(
-                        "\n[wpp-bot]: Satisfaction survey, user answered 'muito bom'"
+                        `\n[wpp-bot]: Satisfaction survey, ${
+                            user.name.split(" ")[0]
+                        } answered 'muito bom'`
                     );
                     return;
                 default:
@@ -485,18 +506,36 @@ async function checkUserStage(user, message) {
 
         userStage[message.from] = "requestedServiceNumber";
     } else if (userStage[message.from] === "requestedServiceNumber") {
-        const listNumbersService = ["1", "2", "3", "4", "5", "6"];
+        const listServices = [
+            "Veículo",
+            "Casa",
+            "Atualizações",
+            "Viagens",
+            "Cancelamentos e Assinaturas",
+            "Agendamentos",
+        ];
+        const numbersService = ["1", "2", "3", "4", "5", "6"];
         const chosenNumber = message.body;
 
-        if (!listNumbersService.includes(chosenNumber)) {
+        if (!numbersService.includes(chosenNumber)) {
             client.sendMessage(
                 message.from,
                 "Número inválido, por favor tente novamente."
             );
         } else {
+            const newSolicitation = await prisma.solicitations.create({
+                data: {
+                    user_id: user.id,
+                    servico: listServices[chosenNumber - 1],
+                },
+            });
+
+            console.log("\n[wpp-bot]: Solicitation created with successfully");
+            console.log("[wpp-bot]: Solicitation ID:", newSolicitation.id);
+
             client.sendMessage(
                 message.from,
-                `Você escolheu o serviço de número ${chosenNumber}.`
+                `Serviço número ${chosenNumber} selecionado.`
             );
 
             client.sendMessage(
@@ -514,7 +553,7 @@ async function checkUserStage(user, message) {
                 "Fique a vontade também para enviar um áudio caso preferir."
             );
 
-            userStage[message.from] = "in_attendance";
+            userStage[message.from] = newSolicitation.id;
         }
     }
 }
