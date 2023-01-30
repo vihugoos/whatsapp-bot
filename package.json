@@ -4,7 +4,7 @@
   "description": "Liber's wpp bot.",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.mjs"
+    "dev": "nodemon src/index.js"
   },
   "dependencies": {
     "@prisma/client": "^4.9.0",
