@@ -25,7 +25,7 @@ model Users {
 model Solicitations {
   id       String    @id @default(uuid())
   user_id  String
-  servico  String
+  service  String
   open     Boolean   @default(true)
   start_at DateTime  @default(now())
   end_at   DateTime?
