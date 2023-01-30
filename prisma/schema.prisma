@@ -17,6 +17,7 @@ model Users {
   phone_number String  @unique
 
   solicitations Solicitations[]
+  surveys       Surveys[]
 
   @@map("users")
 }
@@ -32,4 +33,15 @@ model Solicitations {
   user Users @relation(fields: [user_id], references: [id])
 
   @@map("solicitations")
+}
+
+model Surveys {
+  id      String   @id @default(uuid())
+  user_id String
+  answer  String
+  date    DateTime @default(now())
+
+  user Users @relation(fields: [user_id], references: [id])
+
+  @@map("surveys")
 }
