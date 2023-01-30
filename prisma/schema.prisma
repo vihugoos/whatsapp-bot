@@ -16,5 +16,20 @@ model Users {
   crm          String? @unique
   phone_number String  @unique
 
+  solicitations Solicitations[]
+
   @@map("users")
+}
+
+model Solicitations {
+  id       String    @id @default(uuid())
+  user_id  String
+  servico  String
+  open     Boolean   @default(true)
+  start_at DateTime  @default(now())
+  end_at   DateTime?
+
+  user Users @relation(fields: [user_id], references: [id])
+
+  @@map("solicitations")
 }
