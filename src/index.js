@@ -280,7 +280,7 @@ async function checkUserStage(user, message) {
                 message.from,
                 `Olá ${
                     user.name.split(" ")[0]
-                }, Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻`
+                }, eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻`
             );
         } else {
             client.sendMessage(
