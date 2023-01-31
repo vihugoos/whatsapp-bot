@@ -219,7 +219,7 @@ async function checkUserStage(user, message) {
             switch (message.body) {
                 case "Muito bom":
                     console.log(
-                        `\n[wpp-bot]: Satisfaction survey, ${
+                        `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                             user.name.split(" ")[0]
                         } answered 'muito bom'`
                     );
@@ -236,7 +236,7 @@ async function checkUserStage(user, message) {
                     return;
                 case "Bom":
                     console.log(
-                        `\n[wpp-bot]: Satisfaction survey, ${
+                        `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                             user.name.split(" ")[0]
                         } answered 'bom'`
                     );
@@ -253,7 +253,7 @@ async function checkUserStage(user, message) {
                     return;
                 case "Ruim":
                     console.log(
-                        `\n[wpp-bot]: Satisfaction survey, ${
+                        `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                             user.name.split(" ")[0]
                         } answered 'ruim'`
                     );
@@ -278,7 +278,7 @@ async function checkUserStage(user, message) {
         if (user.name) {
             client.sendMessage(
                 message.from,
-                `Olá ${
+                `Olá Dr(a)${
                     user.name.split(" ")[0]
                 }, eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻`
             );
@@ -377,7 +377,7 @@ async function checkUserStage(user, message) {
 
                     client.sendMessage(
                         message.from,
-                        `${
+                        `Dr(a) ${
                             userUpdated.name.split(" ")[0]
                         }, seu novo número de celular foi atualizado com sucesso!`
                     );
@@ -408,7 +408,7 @@ async function checkUserStage(user, message) {
 
             client.sendMessage(
                 message.from,
-                `Obrigado, ${user.name.split(" ")[0]}!`
+                `Obrigado, Dr(a) ${user.name.split(" ")[0]}!`
             );
 
             client.sendMessage(message.from, "Digite seu *CPF*.");
@@ -419,7 +419,7 @@ async function checkUserStage(user, message) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                `${
+                `Dr(a) ${
                     user.name.split(" ")[0]
                 }, vamos continuar com o seu cadastro.`
             );
@@ -454,7 +454,7 @@ async function checkUserStage(user, message) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                `${
+                `Dr(a) ${
                     user.name.split(" ")[0]
                 }, vamos continuar com o seu cadastro.`
             );
@@ -489,7 +489,7 @@ async function checkUserStage(user, message) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                `${
+                `Dr(a) ${
                     user.name.split(" ")[0]
                 }, vamos continuar com o seu cadastro.`
             );
