@@ -83,10 +83,10 @@ client.on("message_create", async (message) => {
                     );
 
                     const satisfactionSurvey = new Buttons(
-                        "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
+                        "Ajude-nos a melhorar nossos serviços e atendimento respondendo à nossa pesquisa de satisfação. Sua colaboração é muito importante para nós.\nObrigado! 🩺✅",
                         [
                             { body: "Ruim" },
-                            { body: "Mediano" },
+                            { body: "Bom" },
                             { body: "Muito bom" },
                         ],
                         "Pesquisa de Satisfação",
@@ -217,40 +217,6 @@ async function checkUserStage(user, message) {
             let answer;
 
             switch (message.body) {
-                case "Ruim":
-                    console.log(
-                        `\n[wpp-bot]: Satisfaction survey, ${
-                            user.name.split(" ")[0]
-                        } answered 'ruim'`
-                    );
-
-                    answer = await prisma.surveys.create({
-                        data: {
-                            user_id: user.id,
-                            answer: "ruim",
-                        },
-                    });
-
-                    console.log("[bot-wpp]: Survey ID:", answer.id);
-
-                    return;
-                case "Mediano":
-                    console.log(
-                        `\n[wpp-bot]: Satisfaction survey, ${
-                            user.name.split(" ")[0]
-                        } answered 'mediano'`
-                    );
-
-                    answer = await prisma.surveys.create({
-                        data: {
-                            user_id: user.id,
-                            answer: "mediano",
-                        },
-                    });
-
-                    console.log("[bot-wpp]: Survey ID:", answer.id);
-
-                    return;
                 case "Muito bom":
                     console.log(
                         `\n[wpp-bot]: Satisfaction survey, ${
@@ -262,6 +228,40 @@ async function checkUserStage(user, message) {
                         data: {
                             user_id: user.id,
                             answer: "muito bom",
+                        },
+                    });
+
+                    console.log("[bot-wpp]: Survey ID:", answer.id);
+
+                    return;
+                case "Bom":
+                    console.log(
+                        `\n[wpp-bot]: Satisfaction survey, ${
+                            user.name.split(" ")[0]
+                        } answered 'bom'`
+                    );
+
+                    answer = await prisma.surveys.create({
+                        data: {
+                            user_id: user.id,
+                            answer: "bom",
+                        },
+                    });
+
+                    console.log("[bot-wpp]: Survey ID:", answer.id);
+
+                    return;
+                case "Ruim":
+                    console.log(
+                        `\n[wpp-bot]: Satisfaction survey, ${
+                            user.name.split(" ")[0]
+                        } answered 'ruim'`
+                    );
+
+                    answer = await prisma.surveys.create({
+                        data: {
+                            user_id: user.id,
+                            answer: "ruim",
                         },
                     });
 
@@ -280,12 +280,12 @@ async function checkUserStage(user, message) {
                 message.from,
                 `Olá ${
                     user.name.split(" ")[0]
-                }, tudo bem? Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 👩🏻‍💻`
+                }, Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻`
             );
         } else {
             client.sendMessage(
                 message.from,
-                "Olá, tudo bem? Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎"
+                "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻"
             );
         }
     }
@@ -311,7 +311,7 @@ async function checkUserStage(user, message) {
             if (message.body === "Já sou cliente Liber") {
                 client.sendMessage(
                     message.from,
-                    "Apenas para confirmação, por gentiliza digite seu *cpf*."
+                    "Por favor, informe seu *CPF* para confirmação."
                 );
 
                 userStage[message.from] =
@@ -319,7 +319,7 @@ async function checkUserStage(user, message) {
             } else if (message.body === "Não sou cliente") {
                 client.sendMessage(
                     message.from,
-                    "Aguarde alguns instantes por favor, que irei encaminhá-lo(a) para o nosso representante comercial."
+                    "Por favor, aguarde alguns instantes enquanto nosso representante comercial entra em contato."
                 );
 
                 userStage[message.from] = "in_attendance";
@@ -350,7 +350,7 @@ async function checkUserStage(user, message) {
                 if (!previous_registration) {
                     client.sendMessage(
                         message.from,
-                        "Não encontrei esse CPF no nosso sistema."
+                        "*CPF* não encontrado em nossa base de dados."
                     );
 
                     client.sendMessage(
@@ -480,7 +480,7 @@ async function checkUserStage(user, message) {
                     },
                 });
 
-                client.sendMessage(message.from, "Digite seu *email*.");
+                client.sendMessage(message.from, "Digite seu *E-mail*.");
 
                 userStage[message.from] = "requestedEmail";
             }
@@ -496,7 +496,7 @@ async function checkUserStage(user, message) {
 
             client.sendMessage(
                 message.from,
-                "Por gentiliza digite seu *email*."
+                "Por gentiliza digite seu *E-mail*."
             );
 
             userStage[message.from] = "requestedEmail";
@@ -510,7 +510,7 @@ async function checkUserStage(user, message) {
             if (!validateEmail.test(user.email)) {
                 client.sendMessage(
                     message.from,
-                    "Email inválido, por gentileza digite novamente."
+                    "E-mail inválido, por gentileza digite novamente."
                 );
             } else {
                 await prisma.users.update({
@@ -550,8 +550,9 @@ async function checkUserStage(user, message) {
             "Viagens",
             "Cancelamentos e Assinaturas",
             "Agendamentos",
+            "Outros",
         ];
-        const numbersService = ["1", "2", "3", "4", "5", "6"];
+        const numbersService = ["1", "2", "3", "4", "5", "6", "7"];
         const chosenNumber = message.body;
 
         if (!numbersService.includes(chosenNumber)) {
@@ -577,17 +578,17 @@ async function checkUserStage(user, message) {
 
             client.sendMessage(
                 message.from,
-                "Aguarde alguns instantes que irei encaminhar para algum de nossos atendentes, você será atendido em breve."
+                "Enviarei sua solicitação para um de nossos atendentes. Aguarde um momento, você será atendido em breve."
             );
 
             client.sendMessage(
                 message.from,
-                "Caso seja possível, já pode ir nos adiantando com mais detalhes sua requisição."
+                "Se possível, por favor forneça mais detalhes sobre sua solicitação para que possamos avançar com o processo."
             );
 
             client.sendMessage(
                 message.from,
-                "Fique a vontade também para enviar um áudio caso preferir."
+                "Caso prefira, nos envie um áudio."
             );
 
             userStage[message.from] = newSolicitation.id;
@@ -598,6 +599,6 @@ async function checkUserStage(user, message) {
 function sendServiceOptions(message) {
     client.sendMessage(
         message.from,
-        "Digite o número do serviço desejado:\n\n*1*. Veículo\n*2*. Casa\n*3*. Atualizações\n*4*. Viagens\n*5*. Cancelamentos & Assinaturas\n*6*. Agendamentos"
+        "Digite o número do serviço desejado:\n\n*1*. Veículo\n*2*. Casa\n*3*. Atualizações\n*4*. Viagens\n*5*. Cancelamentos & Assinaturas\n*6*. Agendamentos\n*7*. Outros"
     );
 }
