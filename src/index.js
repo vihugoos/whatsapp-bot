@@ -278,7 +278,7 @@ async function checkUserStage(user, message) {
         if (user.name) {
             client.sendMessage(
                 message.from,
-                `Olá Dr(a)${
+                `Olá Dr(a) ${
                     user.name.split(" ")[0]
                 }, eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻`
             );
@@ -433,21 +433,34 @@ async function checkUserStage(user, message) {
             if (user.cpf.length != 11) {
                 client.sendMessage(
                     message.from,
-                    "CPF inválido, por gentileza digite novamente."
+                    "CPF inválido (não possui 11 dígitos), por gentileza digite novamente."
                 );
             } else {
-                await prisma.users.update({
+                const CPFAlreadyExists = await prisma.users.findFirst({
                     where: {
-                        id: user.id,
-                    },
-                    data: {
                         cpf: user.cpf,
                     },
                 });
 
-                client.sendMessage(message.from, "Digite seu *RG*.");
+                if (CPFAlreadyExists) {
+                    client.sendMessage(
+                        message.from,
+                        "Esse CPF já existe em nosso sistema, por favor, tente novamente."
+                    );
+                } else {
+                    await prisma.users.update({
+                        where: {
+                            id: user.id,
+                        },
+                        data: {
+                            cpf: user.cpf,
+                        },
+                    });
 
-                userStage[message.from] = "requestedRG";
+                    client.sendMessage(message.from, "Digite seu *RG*.");
+
+                    userStage[message.from] = "requestedRG";
+                }
             }
         }
     } else if (user.rg === FIELD_NOT_REGISTERED) {
@@ -468,21 +481,34 @@ async function checkUserStage(user, message) {
             if (user.rg.length != 9) {
                 client.sendMessage(
                     message.from,
-                    "RG inválido, por gentileza digite novamente."
+                    "RG inválido (não possui 9 dígitos), por gentileza digite novamente."
                 );
             } else {
-                await prisma.users.update({
+                const RGAlreadyExists = await prisma.users.findFirst({
                     where: {
-                        id: user.id,
-                    },
-                    data: {
                         rg: user.rg,
                     },
                 });
 
-                client.sendMessage(message.from, "Digite seu *E-mail*.");
+                if (RGAlreadyExists) {
+                    client.sendMessage(
+                        message.from,
+                        "Esse RG já existe em nosso sistema, por favor, tente novamente."
+                    );
+                } else {
+                    await prisma.users.update({
+                        where: {
+                            id: user.id,
+                        },
+                        data: {
+                            rg: user.rg,
+                        },
+                    });
 
-                userStage[message.from] = "requestedEmail";
+                    client.sendMessage(message.from, "Digite seu *E-mail*.");
+
+                    userStage[message.from] = "requestedEmail";
+                }
             }
         }
     } else if (user.email === FIELD_NOT_REGISTERED) {
@@ -513,28 +539,41 @@ async function checkUserStage(user, message) {
                     "E-mail inválido, por gentileza digite novamente."
                 );
             } else {
-                await prisma.users.update({
+                const emailAlreadyExists = await prisma.users.findFirst({
                     where: {
-                        id: user.id,
-                    },
-                    data: {
                         email: user.email,
                     },
                 });
 
-                client.sendMessage(
-                    message.from,
-                    "Cadastro realizado com sucesso!"
-                );
+                if (emailAlreadyExists) {
+                    client.sendMessage(
+                        message.from,
+                        "Esse e-mail já existe em nosso sistema, por favor, tente novamente."
+                    );
+                } else {
+                    await prisma.users.update({
+                        where: {
+                            id: user.id,
+                        },
+                        data: {
+                            email: user.email,
+                        },
+                    });
 
-                client.sendMessage(
-                    message.from,
-                    "Você já está habilitado a requisitar nossos serviços."
-                );
+                    client.sendMessage(
+                        message.from,
+                        "Cadastro realizado com sucesso!"
+                    );
 
-                sendServiceOptions(message);
+                    client.sendMessage(
+                        message.from,
+                        "Você já está habilitado a requisitar nossos serviços."
+                    );
 
-                userStage[message.from] = "requestedServiceNumber";
+                    sendServiceOptions(message);
+
+                    userStage[message.from] = "requestedServiceNumber";
+                }
             }
         }
     } else if (userStage[message.from] === USER_WITHOUT_SESSION) {
