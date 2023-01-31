@@ -13,7 +13,6 @@ model Users {
   cpf          String? @unique
   rg           String? @unique
   email        String? @unique
-  crm          String? @unique
   phone_number String  @unique
 
   solicitations Solicitations[]
