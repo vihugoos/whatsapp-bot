@@ -56,38 +56,51 @@ client.on("message_create", async (message) => {
             if (user.cpf) {
                 const solicitationId = userStage[message.to];
 
-                const solicitationClosed = await prisma.solicitations.update({
-                    where: {
-                        id: solicitationId,
-                    },
-                    data: {
-                        open: false,
-                        end_at: new Date(),
-                    },
-                });
-
-                console.log("\n[wpp-bot]: Solicitation closed");
-                console.log(
-                    "[wpp-bot]: Solicitation ID:",
-                    solicitationClosed.id
+                const isSolicitationOpen = await prisma.solicitations.findFirst(
+                    {
+                        where: {
+                            id: solicitationId,
+                        },
+                    }
                 );
 
-                const satisfactionSurvey = new Buttons(
-                    "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
-                    [
-                        { body: "Ruim" },
-                        { body: "Mediano" },
-                        { body: "Muito bom" },
-                    ],
-                    "Pesquisa de Satisfação",
-                    "Liber Assessoria & Soluções"
-                );
+                if (isSolicitationOpen) {
+                    const solicitationClosed =
+                        await prisma.solicitations.update({
+                            where: {
+                                id: solicitationId,
+                            },
+                            data: {
+                                open: false,
+                                end_at: new Date(),
+                            },
+                        });
 
-                client.sendMessage(message.to, satisfactionSurvey);
+                    console.log("\n[wpp-bot]: Solicitation closed");
+                    console.log(
+                        "[wpp-bot]: Solicitation ID:",
+                        solicitationClosed.id
+                    );
 
-                console.log(
-                    `\n[wpp-bot]: Satisfaction survey sent to ${message.to}`
-                );
+                    const satisfactionSurvey = new Buttons(
+                        "Por gentileza nos dê um feedback sobre nossos serviços. É importante você ser realmente sincero para que possamos sempre estarmos melhorando. Obrigado!",
+                        [
+                            { body: "Ruim" },
+                            { body: "Mediano" },
+                            { body: "Muito bom" },
+                        ],
+                        "Pesquisa de Satisfação",
+                        "Liber Assessoria & Soluções"
+                    );
+
+                    client.sendMessage(message.to, satisfactionSurvey);
+
+                    console.log(
+                        `\n[wpp-bot]: Satisfaction survey sent to ${message.to}`
+                    );
+                } else {
+                    console.log("\n[wpp-bot]: Solicitation does not found");
+                }
             } else {
                 console.log(
                     "\n[wpp-bot]: User does not have a registered account"
@@ -267,7 +280,7 @@ async function checkUserStage(user, message) {
                 message.from,
                 `Olá ${
                     user.name.split(" ")[0]
-                }, tudo bem? Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 🌎`
+                }, tudo bem? Sou a assistente virtual da Liber, estou aqui para agilizar no seu atendimento. 👩🏻‍💻`
             );
         } else {
             client.sendMessage(
@@ -320,9 +333,9 @@ async function checkUserStage(user, message) {
             userStage[message.from] ===
             "requestedCPFToConfirmPreviousRegistration"
         ) {
-            user.cpf = message.body.replace(/[^\d]+/g, "");
+            cpfTypedByUser = message.body.replace(/[^\d]+/g, "");
 
-            if (user.cpf.length != 11) {
+            if (cpfTypedByUser.length != 11) {
                 client.sendMessage(
                     message.from,
                     "CPF digitado incorretamente (não possui 11 dígitos), por gentileza digite novamente."
@@ -330,7 +343,7 @@ async function checkUserStage(user, message) {
             } else {
                 previous_registration = await prisma.users.findFirst({
                     where: {
-                        cpf: user.cpf,
+                        cpf: cpfTypedByUser,
                     },
                 });
 
@@ -349,27 +362,23 @@ async function checkUserStage(user, message) {
                 } else {
                     await prisma.users.delete({
                         where: {
-                            id: previous_registration.id,
+                            id: user.id,
                         },
                     });
 
-                    user = await prisma.users.update({
+                    userUpdated = await prisma.users.update({
                         where: {
-                            phone_number: user.phone_number,
+                            cpf: cpfTypedByUser,
                         },
                         data: {
-                            name: previous_registration.name,
-                            cpf: previous_registration.cpf,
-                            rg: previous_registration.rg,
-                            email: previous_registration.email,
-                            crm: previous_registration.crm,
+                            phone_number: user.phone_number,
                         },
                     });
 
                     client.sendMessage(
                         message.from,
                         `${
-                            user.name.split(" ")[0]
+                            userUpdated.name.split(" ")[0]
                         }, seu novo número de celular foi atualizado com sucesso!`
                     );
 
@@ -410,7 +419,9 @@ async function checkUserStage(user, message) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                `${user.name}, vamos continuar com o seu cadastro.`
+                `${
+                    user.name.split(" ")[0]
+                }, vamos continuar com o seu cadastro.`
             );
 
             client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
@@ -443,7 +454,9 @@ async function checkUserStage(user, message) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                `${user.name}, vamos continuar com o seu cadastro.`
+                `${
+                    user.name.split(" ")[0]
+                }, vamos continuar com o seu cadastro.`
             );
 
             client.sendMessage(message.from, "Por gentiliza digite seu *RG*.");
@@ -476,7 +489,9 @@ async function checkUserStage(user, message) {
         if (userStage[message.from] === USER_WITHOUT_SESSION) {
             client.sendMessage(
                 message.from,
-                `${user.name}, vamos continuar com o seu cadastro.`
+                `${
+                    user.name.split(" ")[0]
+                }, vamos continuar com o seu cadastro.`
             );
 
             client.sendMessage(
@@ -504,39 +519,6 @@ async function checkUserStage(user, message) {
                     },
                     data: {
                         email: user.email,
-                    },
-                });
-
-                client.sendMessage(message.from, "Digite seu *CRM*.");
-
-                userStage[message.from] = "requestedCrm";
-            }
-        }
-    } else if (user.crm === FIELD_NOT_REGISTERED) {
-        if (userStage[message.from] === USER_WITHOUT_SESSION) {
-            client.sendMessage(
-                message.from,
-                `${user.name}, vamos continuar com o seu cadastro.`
-            );
-
-            client.sendMessage(message.from, "Por gentiliza digite seu *CRM*.");
-
-            userStage[message.from] = "requestedCrm";
-        } else if (userStage[message.from] === "requestedCrm") {
-            user.crm = message.body.replace(/[^\d]+/g, "");
-
-            if (user.crm.length != 6) {
-                client.sendMessage(
-                    message.from,
-                    "CRM inválido, por gentileza digite novamente."
-                );
-            } else {
-                await prisma.users.update({
-                    where: {
-                        id: user.id,
-                    },
-                    data: {
-                        crm: user.crm,
                     },
                 });
 
