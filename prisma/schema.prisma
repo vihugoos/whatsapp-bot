@@ -14,6 +14,7 @@ model Users {
   rg           String? @unique
   email        String? @unique
   phone_number String  @unique
+  stage        String?
 
   solicitations Solicitations[]
   surveys       Surveys[]
