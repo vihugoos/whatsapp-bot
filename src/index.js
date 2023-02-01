@@ -54,21 +54,20 @@ client.on("message_create", async (message) => {
             });
 
             if (user.cpf) {
-                const solicitationId = userStage[message.to];
-
-                const isSolicitationOpen = await prisma.solicitations.findFirst(
-                    {
-                        where: {
-                            id: solicitationId,
+                const solicitation = await prisma.solicitations.findFirst({
+                    where: {
+                        user_id: user.id,
+                        AND: {
+                            open: true,
                         },
-                    }
-                );
+                    },
+                });
 
-                if (isSolicitationOpen) {
+                if (solicitation) {
                     const solicitationClosed =
                         await prisma.solicitations.update({
                             where: {
-                                id: solicitationId,
+                                id: solicitation.id,
                             },
                             data: {
                                 open: false,
