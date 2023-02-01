@@ -3,8 +3,7 @@ const qrcode = require("qrcode-terminal");
 
 const prisma = require("./database/prisma-client");
 const convertToTitleCase = require("./utils/convertToTitleCase");
-
-var userStage = [];
+const sendServiceOptions = require("./lib/sendServiceOptions");
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -42,18 +41,18 @@ client.on("message", async (message) => {
 
 client.on("message_create", async (message) => {
     if (message.fromMe) {
+        const phone_number = message.to.replace(/[^\d]+/g, "");
+
+        const user = await prisma.users.findFirst({
+            where: {
+                phone_number,
+            },
+        });
+
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
             console.log("\n[wpp-bot]: Function attendance ended called");
 
-            const phone_number = message.to.replace(/[^\d]+/g, "");
-
-            const user = await prisma.users.findFirst({
-                where: {
-                    phone_number,
-                },
-            });
-
-            if (user.cpf) {
+            if (user.email) {
                 const solicitation = await prisma.solicitations.findFirst({
                     where: {
                         user_id: user.id,
@@ -106,7 +105,14 @@ client.on("message_create", async (message) => {
                 );
             }
 
-            userStage[message.to] = undefined;
+            await prisma.users.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    stage: null,
+                },
+            });
 
             console.log(`\n[wpp-bot]: Attendance ended for ${message.to}`);
         }
@@ -116,7 +122,14 @@ client.on("message_create", async (message) => {
                 .toLowerCase()
                 .includes("prosseguimento no seu cadastro")
         ) {
-            userStage[message.to] = "requestedFullName";
+            await prisma.users.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    stage: "requestedFullName",
+                },
+            });
 
             client.sendMessage(
                 message.to,
@@ -179,10 +192,6 @@ client.on("disconnected", (reason) => {
 async function identifyUserByPhoneNumber(message) {
     if (message.from === "status@broadcast") return;
 
-    console.log("\n[wpp-bot]: User stage:", userStage[message.from]);
-
-    console.log(`[wpp-bot]: Message from ${message.from}:`, message.body);
-
     const phone_number = (await message.getContact()).number;
 
     let user = await prisma.users.findFirst({
@@ -201,96 +210,110 @@ async function identifyUserByPhoneNumber(message) {
         });
     }
 
+    console.log("\n[wpp-bot]: User stage:", user.stage);
+    console.log(`[wpp-bot]: Message from ${user.phone_number}:`, message.body);
     console.log("[wpp-bot]: User ID:", user.id);
 
     checkUserStage(user, message);
 }
 
 async function checkUserStage(user, message) {
-    const USER_WITHOUT_SESSION = undefined;
-    const FIELD_NOT_REGISTERED = null;
+    const USER_WITHOUT_SESSION = null;
+    const USER_WITHOUT_REGISTRATION = !user.email ? true : false;
+    const USER_REGISTERED = user.email;
 
-    if (userStage[message.from] === USER_WITHOUT_SESSION) {
-        // Verify if user answered satisfaction survey
-        if (message.hasQuotedMsg) {
-            let answer;
+    if (USER_REGISTERED) {
+        if (user.stage === USER_WITHOUT_SESSION) {
+            // Verify if user answered satisfaction survey
+            if (message.hasQuotedMsg) {
+                let answer;
 
-            switch (message.body) {
-                case "Muito bom":
-                    console.log(
-                        `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
-                            user.name.split(" ")[0]
-                        } answered 'muito bom'`
-                    );
+                switch (message.body) {
+                    case "Muito bom":
+                        console.log(
+                            `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
+                                user.name.split(" ")[0]
+                            } answered 'muito bom'`
+                        );
 
-                    answer = await prisma.surveys.create({
-                        data: {
-                            user_id: user.id,
-                            answer: "muito bom",
-                        },
-                    });
+                        answer = await prisma.surveys.create({
+                            data: {
+                                user_id: user.id,
+                                answer: "muito bom",
+                            },
+                        });
 
-                    console.log("[bot-wpp]: Survey ID:", answer.id);
+                        console.log("[bot-wpp]: Survey ID:", answer.id);
 
-                    return;
-                case "Bom":
-                    console.log(
-                        `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
-                            user.name.split(" ")[0]
-                        } answered 'bom'`
-                    );
+                        return;
+                    case "Bom":
+                        console.log(
+                            `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
+                                user.name.split(" ")[0]
+                            } answered 'bom'`
+                        );
 
-                    answer = await prisma.surveys.create({
-                        data: {
-                            user_id: user.id,
-                            answer: "bom",
-                        },
-                    });
+                        answer = await prisma.surveys.create({
+                            data: {
+                                user_id: user.id,
+                                answer: "bom",
+                            },
+                        });
 
-                    console.log("[bot-wpp]: Survey ID:", answer.id);
+                        console.log("[bot-wpp]: Survey ID:", answer.id);
 
-                    return;
-                case "Ruim":
-                    console.log(
-                        `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
-                            user.name.split(" ")[0]
-                        } answered 'ruim'`
-                    );
+                        return;
+                    case "Ruim":
+                        console.log(
+                            `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
+                                user.name.split(" ")[0]
+                            } answered 'ruim'`
+                        );
 
-                    answer = await prisma.surveys.create({
-                        data: {
-                            user_id: user.id,
-                            answer: "ruim",
-                        },
-                    });
+                        answer = await prisma.surveys.create({
+                            data: {
+                                user_id: user.id,
+                                answer: "ruim",
+                            },
+                        });
 
-                    console.log("[bot-wpp]: Survey ID:", answer.id);
+                        console.log("[bot-wpp]: Survey ID:", answer.id);
 
-                    return;
-                default:
-                    console.log(
-                        "\n[wpp-bot]: Satisfaction survey, answer not found!"
-                    );
+                        return;
+                    default:
+                        console.log(
+                            "\n[wpp-bot]: Satisfaction survey, answer not found!"
+                        );
+                }
             }
-        }
 
-        if (user.name) {
             client.sendMessage(
                 message.from,
                 `Olá Dr(a) ${
                     user.name.split(" ")[0]
-                }, eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻`
+                }, eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje? 🩺✅👩🏻‍💻`
             );
-        } else {
-            client.sendMessage(
-                message.from,
-                "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje?  🩺✅👩🏻‍💻"
-            );
+
+            sendServiceOptions(client, message);
+
+            await prisma.users.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    stage: "requestedServiceNumber",
+                },
+            });
         }
     }
 
-    if (user.name === FIELD_NOT_REGISTERED) {
-        if (userStage[message.from] === USER_WITHOUT_SESSION) {
+    if (USER_WITHOUT_REGISTRATION) {
+        if (user.stage === USER_WITHOUT_SESSION) {
+            client.sendMessage(
+                message.from,
+                "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje? 🩺✅👩🏻‍💻"
+            );
+
             client.sendMessage(
                 message.from,
                 "Verifiquei que esse número não está cadastrado em nosso sistema."
@@ -305,36 +328,57 @@ async function checkUserStage(user, message) {
 
             client.sendMessage(message.from, buttons);
 
-            userStage[message.from] = "askedIfAlreadyClientLiber";
-        } else if (userStage[message.from] === "askedIfAlreadyClientLiber") {
+            await prisma.users.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    stage: "askedIfAlreadyClientLiber",
+                },
+            });
+        }
+
+        if (user.stage === "askedIfAlreadyClientLiber") {
             if (message.body === "Já sou cliente Liber") {
                 client.sendMessage(
                     message.from,
                     "Por favor, informe seu *CPF* para confirmação."
                 );
 
-                userStage[message.from] =
-                    "requestedCPFToConfirmPreviousRegistration";
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        stage: "requestedCPFToConfirmPreviousRegistration",
+                    },
+                });
             } else if (message.body === "Não sou cliente") {
                 client.sendMessage(
                     message.from,
                     "Por favor, aguarde alguns instantes enquanto nosso representante comercial entra em contato."
                 );
 
-                userStage[message.from] = "in_attendance";
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        stage: "in_attendance",
+                    },
+                });
             } else {
                 client.sendMessage(
                     message.from,
                     "Resposta inválida, por gentileza selecione uma das opções acima."
                 );
             }
-        } else if (
-            userStage[message.from] ===
-            "requestedCPFToConfirmPreviousRegistration"
-        ) {
-            cpfTypedByUser = message.body.replace(/[^\d]+/g, "");
+        }
 
-            if (cpfTypedByUser.length != 11) {
+        if (user.stage === "requestedCPFToConfirmPreviousRegistration") {
+            let cpfToConfirmTypedByUser = message.body.replace(/[^\d]+/g, "");
+
+            if (cpfToConfirmTypedByUser.length != 11) {
                 client.sendMessage(
                     message.from,
                     "CPF digitado incorretamente (não possui 11 dígitos), por gentileza digite novamente."
@@ -342,7 +386,7 @@ async function checkUserStage(user, message) {
             } else {
                 previous_registration = await prisma.users.findFirst({
                     where: {
-                        cpf: cpfTypedByUser,
+                        cpf: cpfToConfirmTypedByUser,
                     },
                 });
 
@@ -357,7 +401,14 @@ async function checkUserStage(user, message) {
                         "Por favor, aguarde alguns instantes que irei encaminha-lo a um de nossos atendentes para melhor análise do caso."
                     );
 
-                    userStage[message.from] = "in_attendance";
+                    await prisma.users.update({
+                        where: {
+                            id: user.id,
+                        },
+                        data: {
+                            stage: "in_attendance",
+                        },
+                    });
                 } else {
                     await prisma.users.delete({
                         where: {
@@ -367,7 +418,7 @@ async function checkUserStage(user, message) {
 
                     userUpdated = await prisma.users.update({
                         where: {
-                            cpf: cpfTypedByUser,
+                            cpf: cpfToConfirmTypedByUser,
                         },
                         data: {
                             phone_number: user.phone_number,
@@ -386,201 +437,199 @@ async function checkUserStage(user, message) {
                         "Você já está habilitado a requisitar nossos serviços novamente."
                     );
 
-                    sendServiceOptions(message);
+                    sendServiceOptions(client, message);
 
-                    userStage[message.from] = "requestedServiceNumber";
+                    await prisma.users.update({
+                        where: {
+                            id: userUpdated.id,
+                        },
+                        data: {
+                            stage: "requestedServiceNumber",
+                        },
+                    });
                 }
             }
-        } else if (userStage[message.from] === "requestedFullName") {
-            user.name = message.body.replace(/[^a-zA-Z ]/g, "");
+        }
+    }
 
-            user.name = convertToTitleCase(user.name);
+    if (user.stage === "requestedFullName") {
+        let nameTypedByUser = message.body.replace(/[^a-zA-Z ]/g, "");
 
-            await prisma.users.update({
+        nameTypedByUser = convertToTitleCase(nameTypedByUser);
+
+        await prisma.users.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                name: nameTypedByUser,
+            },
+        });
+
+        client.sendMessage(
+            message.from,
+            `Obrigado, Dr(a) ${nameTypedByUser.split(" ")[0]}!`
+        );
+
+        client.sendMessage(message.from, "Digite seu *CPF*.");
+
+        await prisma.users.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                stage: "requestedCPF",
+            },
+        });
+    }
+
+    if (user.stage === "requestedCPF") {
+        let cpfTypedByUser = message.body.replace(/[^\d]+/g, "");
+
+        if (cpfTypedByUser.length != 11) {
+            client.sendMessage(
+                message.from,
+                "CPF inválido (não possui 11 dígitos), por gentileza digite novamente."
+            );
+        } else {
+            const CPFAlreadyExists = await prisma.users.findFirst({
                 where: {
-                    id: user.id,
-                },
-                data: {
-                    name: user.name,
+                    cpf: cpfTypedByUser,
                 },
             });
 
-            client.sendMessage(
-                message.from,
-                `Obrigado, Dr(a) ${user.name.split(" ")[0]}!`
-            );
-
-            client.sendMessage(message.from, "Digite seu *CPF*.");
-
-            userStage[message.from] = "requestedCPF";
-        }
-    } else if (user.cpf === FIELD_NOT_REGISTERED) {
-        if (userStage[message.from] === USER_WITHOUT_SESSION) {
-            client.sendMessage(
-                message.from,
-                `Dr(a) ${
-                    user.name.split(" ")[0]
-                }, vamos continuar com o seu cadastro.`
-            );
-
-            client.sendMessage(message.from, "Por gentiliza digite seu *CPF*.");
-
-            userStage[message.from] = "requestedCPF";
-        } else if (userStage[message.from] === "requestedCPF") {
-            user.cpf = message.body.replace(/[^\d]+/g, "");
-
-            if (user.cpf.length != 11) {
+            if (CPFAlreadyExists) {
                 client.sendMessage(
                     message.from,
-                    "CPF inválido (não possui 11 dígitos), por gentileza digite novamente."
+                    "Esse CPF já existe em nosso sistema, por favor, tente novamente."
                 );
             } else {
-                const CPFAlreadyExists = await prisma.users.findFirst({
+                await prisma.users.update({
                     where: {
-                        cpf: user.cpf,
+                        id: user.id,
+                    },
+                    data: {
+                        cpf: cpfTypedByUser,
                     },
                 });
 
-                if (CPFAlreadyExists) {
-                    client.sendMessage(
-                        message.from,
-                        "Esse CPF já existe em nosso sistema, por favor, tente novamente."
-                    );
-                } else {
-                    await prisma.users.update({
-                        where: {
-                            id: user.id,
-                        },
-                        data: {
-                            cpf: user.cpf,
-                        },
-                    });
+                client.sendMessage(message.from, "Digite seu *RG*.");
 
-                    client.sendMessage(message.from, "Digite seu *RG*.");
-
-                    userStage[message.from] = "requestedRG";
-                }
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        stage: "requestedRG",
+                    },
+                });
             }
         }
-    } else if (user.rg === FIELD_NOT_REGISTERED) {
-        if (userStage[message.from] === USER_WITHOUT_SESSION) {
+    }
+
+    if (user.stage === "requestedRG") {
+        rgTypedByUser = message.body.replace(/[^\d]+/g, "");
+
+        if (rgTypedByUser.length != 9) {
             client.sendMessage(
                 message.from,
-                `Dr(a) ${
-                    user.name.split(" ")[0]
-                }, vamos continuar com o seu cadastro.`
+                "RG inválido (não possui 9 dígitos), por gentileza digite novamente."
             );
+        } else {
+            const RGAlreadyExists = await prisma.users.findFirst({
+                where: {
+                    rg: rgTypedByUser,
+                },
+            });
 
-            client.sendMessage(message.from, "Por gentiliza digite seu *RG*.");
-
-            userStage[message.from] = "requestedRG";
-        } else if (userStage[message.from] === "requestedRG") {
-            user.rg = message.body.replace(/[^\d]+/g, "");
-
-            if (user.rg.length != 9) {
+            if (RGAlreadyExists) {
                 client.sendMessage(
                     message.from,
-                    "RG inválido (não possui 9 dígitos), por gentileza digite novamente."
+                    "Esse RG já existe em nosso sistema, por favor, tente novamente."
                 );
             } else {
-                const RGAlreadyExists = await prisma.users.findFirst({
+                await prisma.users.update({
                     where: {
-                        rg: user.rg,
+                        id: user.id,
+                    },
+                    data: {
+                        rg: rgTypedByUser,
                     },
                 });
 
-                if (RGAlreadyExists) {
-                    client.sendMessage(
-                        message.from,
-                        "Esse RG já existe em nosso sistema, por favor, tente novamente."
-                    );
-                } else {
-                    await prisma.users.update({
-                        where: {
-                            id: user.id,
-                        },
-                        data: {
-                            rg: user.rg,
-                        },
-                    });
+                client.sendMessage(message.from, "Digite seu *E-mail*.");
 
-                    client.sendMessage(message.from, "Digite seu *E-mail*.");
-
-                    userStage[message.from] = "requestedEmail";
-                }
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        stage: "requestedEmail",
+                    },
+                });
             }
         }
-    } else if (user.email === FIELD_NOT_REGISTERED) {
-        if (userStage[message.from] === USER_WITHOUT_SESSION) {
+    }
+
+    if (user.stage === "requestedEmail") {
+        const validateEmail = new RegExp(
+            "([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|[[\t -Z^-~]*])"
+        );
+
+        emailTypedByUser = message.body.toLowerCase();
+
+        if (!validateEmail.test(emailTypedByUser)) {
             client.sendMessage(
                 message.from,
-                `Dr(a) ${
-                    user.name.split(" ")[0]
-                }, vamos continuar com o seu cadastro.`
+                "E-mail inválido, por gentileza digite novamente."
             );
+        } else {
+            const emailAlreadyExists = await prisma.users.findFirst({
+                where: {
+                    email: emailTypedByUser,
+                },
+            });
 
-            client.sendMessage(
-                message.from,
-                "Por gentiliza digite seu *E-mail*."
-            );
-
-            userStage[message.from] = "requestedEmail";
-        } else if (userStage[message.from] === "requestedEmail") {
-            const validateEmail = new RegExp(
-                "([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|[[\t -Z^-~]*])"
-            );
-
-            user.email = message.body.toLowerCase();
-
-            if (!validateEmail.test(user.email)) {
+            if (emailAlreadyExists) {
                 client.sendMessage(
                     message.from,
-                    "E-mail inválido, por gentileza digite novamente."
+                    "Esse e-mail já existe em nosso sistema, por favor, tente novamente."
                 );
             } else {
-                const emailAlreadyExists = await prisma.users.findFirst({
+                await prisma.users.update({
                     where: {
-                        email: user.email,
+                        id: user.id,
+                    },
+                    data: {
+                        email: emailTypedByUser,
                     },
                 });
 
-                if (emailAlreadyExists) {
-                    client.sendMessage(
-                        message.from,
-                        "Esse e-mail já existe em nosso sistema, por favor, tente novamente."
-                    );
-                } else {
-                    await prisma.users.update({
-                        where: {
-                            id: user.id,
-                        },
-                        data: {
-                            email: user.email,
-                        },
-                    });
+                client.sendMessage(
+                    message.from,
+                    "Cadastro realizado com sucesso!"
+                );
 
-                    client.sendMessage(
-                        message.from,
-                        "Cadastro realizado com sucesso!"
-                    );
+                client.sendMessage(
+                    message.from,
+                    "Você já está habilitado a requisitar nossos serviços."
+                );
 
-                    client.sendMessage(
-                        message.from,
-                        "Você já está habilitado a requisitar nossos serviços."
-                    );
+                sendServiceOptions(client, message);
 
-                    sendServiceOptions(message);
-
-                    userStage[message.from] = "requestedServiceNumber";
-                }
+                await prisma.users.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        stage: "requestedServiceNumber",
+                    },
+                });
             }
         }
-    } else if (userStage[message.from] === USER_WITHOUT_SESSION) {
-        // User already registered, requesting service number.
-        sendServiceOptions(message);
+    }
 
-        userStage[message.from] = "requestedServiceNumber";
-    } else if (userStage[message.from] === "requestedServiceNumber") {
+    if (user.stage === "requestedServiceNumber") {
         const listServices = [
             "Veículo",
             "Casa",
@@ -629,14 +678,14 @@ async function checkUserStage(user, message) {
                 "Caso prefira, nos envie um áudio."
             );
 
-            userStage[message.from] = newSolicitation.id;
+            await prisma.users.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    stage: "in_attendance",
+                },
+            });
         }
     }
-}
-
-function sendServiceOptions(message) {
-    client.sendMessage(
-        message.from,
-        "Digite o número do serviço desejado:\n\n*1*. Veículo\n*2*. Casa\n*3*. Atualizações\n*4*. Viagens\n*5*. Cancelamentos & Assinaturas\n*6*. Agendamentos\n*7*. Outros"
-    );
 }
