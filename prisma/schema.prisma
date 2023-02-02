@@ -17,31 +17,20 @@ model Users {
   stage        String?
 
   solicitations Solicitations[]
-  surveys       Surveys[]
 
   @@map("users")
 }
 
 model Solicitations {
-  id       String    @id @default(uuid())
-  user_id  String
-  service  String
-  open     Boolean   @default(true)
-  start_at DateTime  @default(now())
-  end_at   DateTime?
+  id           String    @id @default(uuid())
+  user_id      String
+  service      String
+  open         Boolean   @default(true)
+  start_at     DateTime  @default(now())
+  end_at       DateTime?
+  satisfaction String?
 
   user Users @relation(fields: [user_id], references: [id])
 
   @@map("solicitations")
-}
-
-model Surveys {
-  id      String   @id @default(uuid())
-  user_id String
-  answer  String
-  date    DateTime @default(now())
-
-  user Users @relation(fields: [user_id], references: [id])
-
-  @@map("surveys")
 }
