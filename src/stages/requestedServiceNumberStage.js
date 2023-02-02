@@ -22,12 +22,30 @@ module.exports = async function requestedServiceNumberStage(
             "Número inválido, por favor tente novamente."
         );
     } else {
+        const attendant = await prisma.attendants.findFirst({
+            where: {
+                in_attendance: false,
+            },
+        });
+
         const newSolicitation = await prisma.solicitations.create({
             data: {
                 user_id: user.id,
                 service: listServices[chosenNumber - 1],
+                attendant_id: attendant ? attendant.id : null,
             },
         });
+
+        if (attendant) {
+            await prisma.attendants.update({
+                where: {
+                    id: attendant.id,
+                },
+                data: {
+                    in_attendance: true,
+                },
+            });
+        }
 
         console.log("\n[wpp-bot]: Solicitation created with successfully");
         console.log("[wpp-bot]: Solicitation ID:", newSolicitation.id);

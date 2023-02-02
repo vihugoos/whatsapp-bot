@@ -34,6 +34,17 @@ module.exports = async function endedAttendanceFlag(
             console.log("\n[wpp-bot]: Solicitation closed");
             console.log("[wpp-bot]: Solicitation ID:", solicitationClosed.id);
 
+            if (solicitationClosed.attendant_id) {
+                await prisma.attendants.update({
+                    where: {
+                        id: solicitationClosed.attendant_id,
+                    },
+                    data: {
+                        in_attendance: false,
+                    },
+                });
+            }
+
             sendSatisfactionSurvey(client, message);
         } else {
             console.log("\n[wpp-bot]: Solicitation does not found");
