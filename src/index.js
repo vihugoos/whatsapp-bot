@@ -143,22 +143,6 @@ client.on("message_create", async (message) => {
     }
 });
 
-client.on("message_revoke_everyone", async (before) => {
-    if (before) {
-        if (before.from === "status@broadcast") return;
-
-        console.log("\n[wpp-bot]: Message deleted:", {
-            fromMe: before.fromMe,
-            from: before.from,
-            notifyName: before.notifyName,
-            author: before.author,
-            type: before.type,
-            body: before.body,
-            isStatus: before.isStatus,
-        });
-    }
-});
-
 client.on("group_join", (notification) => {
     console.log("\n[wpp-bot]: bot joined the group:", notification);
 });
