@@ -21,16 +21,30 @@ model Users {
   @@map("users")
 }
 
+model Attendants {
+  id               String  @id @default(uuid())
+  name             String
+  discord_username String
+  email            String
+  in_attendance    Boolean @default(false)
+
+  solicitations Solicitations[]
+
+  @@map("attendants")
+}
+
 model Solicitations {
   id           String    @id @default(uuid())
   user_id      String
+  attendant_id String?
   service      String
   open         Boolean   @default(true)
   start_at     DateTime  @default(now())
   end_at       DateTime?
   satisfaction String?
 
-  user Users @relation(fields: [user_id], references: [id])
+  user      Users       @relation(fields: [user_id], references: [id])
+  attendant Attendants? @relation(fields: [attendant_id], references: [id])
 
   @@map("solicitations")
 }
