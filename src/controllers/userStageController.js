@@ -16,9 +16,9 @@ module.exports = async function userStageController(
 ) {
     const USER_WITHOUT_SESSION = null;
     const USER_WITHOUT_REGISTRATION = !user.cpf ? true : false;
-    const USER_REGISTERED = user.cpf;
+    const USER_HAS_REGISTRATION = user.cpf;
 
-    if (USER_REGISTERED) {
+    if (USER_HAS_REGISTRATION) {
         if (user.stage === USER_WITHOUT_SESSION) {
             userAlreadyRegisteredWithoutSessionStage(
                 client,
