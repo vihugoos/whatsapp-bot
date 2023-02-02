@@ -5,17 +5,28 @@ module.exports = async function capturedSatisfactionSurvey(
 ) {
     if (message.hasQuotedMsg) {
         switch (message.body) {
-            case "Muito bom":
+            case "Ruim":
                 console.log(
                     `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                         user.name.split(" ")[0]
-                    } answered 'muito bom'`
+                    } answered 'ruim'`
                 );
 
-                await prisma.surveys.create({
-                    data: {
+                const option_1 = await prisma.solicitations.findFirst({
+                    where: {
                         user_id: user.id,
-                        answer: "muito bom",
+                    },
+                    orderBy: {
+                        end_at: "desc",
+                    },
+                });
+
+                await prisma.solicitations.update({
+                    where: {
+                        id: option_1.id,
+                    },
+                    data: {
+                        satisfaction: "ruim",
                     },
                 });
 
@@ -27,25 +38,47 @@ module.exports = async function capturedSatisfactionSurvey(
                     } answered 'bom'`
                 );
 
-                await prisma.surveys.create({
-                    data: {
+                const option_2 = await prisma.solicitations.findFirst({
+                    where: {
                         user_id: user.id,
-                        answer: "bom",
+                    },
+                    orderBy: {
+                        end_at: "desc",
+                    },
+                });
+
+                await prisma.solicitations.update({
+                    where: {
+                        id: option_2.id,
+                    },
+                    data: {
+                        satisfaction: "bom",
                     },
                 });
 
                 return true;
-            case "Ruim":
+            case "Muito bom":
                 console.log(
                     `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                         user.name.split(" ")[0]
-                    } answered 'ruim'`
+                    } answered 'muito bom'`
                 );
 
-                await prisma.surveys.create({
-                    data: {
+                const option_3 = await prisma.solicitations.findFirst({
+                    where: {
                         user_id: user.id,
-                        answer: "ruim",
+                    },
+                    orderBy: {
+                        end_at: "desc",
+                    },
+                });
+
+                await prisma.solicitations.update({
+                    where: {
+                        id: option_3.id,
+                    },
+                    data: {
+                        satisfaction: "muito bom",
                     },
                 });
 
