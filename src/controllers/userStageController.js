@@ -1,3 +1,4 @@
+const captureSatisfactionSurvey = require("../lib/captureSatisfactionSurvey");
 const userAlreadyRegisteredWithoutSessionStage = require("../stages/userAlreadyRegisteredWithoutSessionStage");
 const userWithoutRegistrationWithoutSessionStage = require("../stages/userWithoutRegistrationWithoutSessionStage");
 const askedIfAlreadyClientLiberStage = require("../stages/askedIfAlreadyClientLiberStage");
@@ -20,6 +21,14 @@ module.exports = async function userStageController(
 
     if (USER_HAS_REGISTRATION) {
         if (user.stage === USER_WITHOUT_SESSION) {
+            const answeredSurvey = await captureSatisfactionSurvey(
+                prisma,
+                user,
+                message
+            );
+
+            if (answeredSurvey) return;
+
             userAlreadyRegisteredWithoutSessionStage(
                 client,
                 prisma,
