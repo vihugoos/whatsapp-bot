@@ -1,4 +1,4 @@
-module.exports = async function captureSatisfactionSurvey(
+module.exports = async function capturedSatisfactionSurvey(
     prisma,
     user,
     message
