@@ -2,6 +2,7 @@ const { Client, LocalAuth, Buttons } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
 const identifyUserByPhoneNumberController = require("./controllers/identifyUserByPhoneNumberController");
+const rejectCalls = require("./lib/rejectCalls");
 
 const prisma = require("./database/prisma-client");
 
@@ -148,21 +149,7 @@ client.on("group_join", (notification) => {
 });
 
 client.on("call", async (call) => {
-    let rejectCalls = true;
-
-    console.log("\n[wpp-bot]: Call received, rejecting:", call);
-
-    if (rejectCalls) await call.reject();
-
-    await client.sendMessage(
-        call.from,
-        "Ops, nós não aceitamos calls por essa conta!"
-    );
-
-    await client.sendMessage(
-        call.from,
-        "Todo nosso contato é feito apenas via chat."
-    );
+    rejectCalls(client, call);
 });
 
 client.on("change_state", (state) => {
