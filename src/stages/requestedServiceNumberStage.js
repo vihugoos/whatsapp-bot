@@ -39,6 +39,11 @@ module.exports = async function requestedServiceNumberStage(
 
         client.sendMessage(
             message.from,
+            `Protocolo de atendimento: ${newSolicitation.id}`
+        );
+
+        client.sendMessage(
+            message.from,
             "Enviarei sua solicitação para um de nossos atendentes. Aguarde um momento, você será atendido em breve."
         );
 
