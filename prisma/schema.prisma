@@ -24,8 +24,8 @@ model Users {
 model Attendants {
   id               String  @id @default(uuid())
   name             String
-  discord_username String
-  email            String
+  discord_username String  @unique
+  email            String  @unique
   in_attendance    Boolean @default(false)
 
   solicitations Solicitations[]
