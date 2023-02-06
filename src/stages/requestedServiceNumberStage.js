@@ -1,3 +1,5 @@
+const sendMessageToDiscordChannel = require("../webhooks/discord");
+
 module.exports = async function requestedServiceNumberStage(
     client,
     prisma,
@@ -57,7 +59,7 @@ module.exports = async function requestedServiceNumberStage(
 
         client.sendMessage(
             message.from,
-            `Protocolo de atendimento: ${newSolicitation.id}`
+            `Protocolo de atendimento: *${newSolicitation.id}*`
         );
 
         client.sendMessage(
@@ -71,6 +73,15 @@ module.exports = async function requestedServiceNumberStage(
         );
 
         client.sendMessage(message.from, "Caso prefira, nos envie um áudio.");
+
+        const client_name = (await message.getContact()).name;
+
+        await sendMessageToDiscordChannel({
+            client_name,
+            chosen_service: listServices[chosenNumber - 1],
+            protocol: newSolicitation.id,
+            discord_user_id: attendant ? attendant.discord_user_id : null,
+        });
 
         await prisma.users.update({
             where: {
