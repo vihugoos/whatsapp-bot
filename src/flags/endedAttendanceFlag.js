@@ -27,7 +27,10 @@ module.exports = async function endedAttendanceFlag(
                 },
                 data: {
                     open: false,
-                    end_at: new Date(),
+                    end_at: new Date().toLocaleString("pt-BR", {
+                        timeZone: "America/Sao_Paulo",
+                    }),
+                    bot_end_at: new Date(),
                 },
             });
 

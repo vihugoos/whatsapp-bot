@@ -17,7 +17,7 @@ module.exports = async function capturedSatisfactionSurvey(
                         user_id: user.id,
                     },
                     orderBy: {
-                        end_at: "desc",
+                        bot_end_at: "desc",
                     },
                 });
 
@@ -43,7 +43,7 @@ module.exports = async function capturedSatisfactionSurvey(
                         user_id: user.id,
                     },
                     orderBy: {
-                        end_at: "desc",
+                        bot_end_at: "desc",
                     },
                 });
 
@@ -69,7 +69,7 @@ module.exports = async function capturedSatisfactionSurvey(
                         user_id: user.id,
                     },
                     orderBy: {
-                        end_at: "desc",
+                        bot_end_at: "desc",
                     },
                 });
 

@@ -33,8 +33,11 @@ module.exports = async function requestedServiceNumberStage(
         const newSolicitation = await prisma.solicitations.create({
             data: {
                 user_id: user.id,
-                service: listServices[chosenNumber - 1],
                 attendant_id: attendant ? attendant.id : null,
+                service: listServices[chosenNumber - 1],
+                start_at: new Date().toLocaleString("pt-BR", {
+                    timeZone: "America/Sao_Paulo",
+                }),
             },
         });
 
