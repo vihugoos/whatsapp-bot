@@ -29,8 +29,10 @@ CREATE TABLE "solicitations" (
     "attendant_id" TEXT,
     "service" TEXT NOT NULL,
     "open" BOOLEAN NOT NULL DEFAULT true,
-    "start_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "end_at" TIMESTAMP(3),
+    "start_at" TEXT NOT NULL,
+    "end_at" TEXT,
+    "bot_start_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "bot_end_at" TIMESTAMP(3),
     "satisfaction" TEXT,
 
     CONSTRAINT "solicitations_pkey" PRIMARY KEY ("id")
