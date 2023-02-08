@@ -39,8 +39,10 @@ model Solicitations {
   attendant_id String?
   service      String
   open         Boolean   @default(true)
-  start_at     DateTime  @default(now())
-  end_at       DateTime?
+  start_at     String
+  end_at       String?
+  bot_start_at DateTime  @default(now())
+  bot_end_at   DateTime?
   satisfaction String?
 
   user      Users       @relation(fields: [user_id], references: [id])
