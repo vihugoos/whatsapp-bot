@@ -9,7 +9,7 @@ module.exports = async function capturedSatisfactionSurvey(
                 console.log(
                     `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                         user.name.split(" ")[0]
-                    } answered 'ruim'`
+                    } answered 'Ruim'`
                 );
 
                 const option_1 = await prisma.solicitations.findFirst({
@@ -26,7 +26,7 @@ module.exports = async function capturedSatisfactionSurvey(
                         id: option_1.id,
                     },
                     data: {
-                        satisfaction: "ruim",
+                        satisfaction: "Ruim",
                     },
                 });
 
@@ -35,7 +35,7 @@ module.exports = async function capturedSatisfactionSurvey(
                 console.log(
                     `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                         user.name.split(" ")[0]
-                    } answered 'bom'`
+                    } answered 'Bom'`
                 );
 
                 const option_2 = await prisma.solicitations.findFirst({
@@ -52,7 +52,7 @@ module.exports = async function capturedSatisfactionSurvey(
                         id: option_2.id,
                     },
                     data: {
-                        satisfaction: "bom",
+                        satisfaction: "Bom",
                     },
                 });
 
@@ -61,7 +61,7 @@ module.exports = async function capturedSatisfactionSurvey(
                 console.log(
                     `\n[wpp-bot]: Satisfaction survey, Dr(a) ${
                         user.name.split(" ")[0]
-                    } answered 'muito bom'`
+                    } answered 'Muito bom'`
                 );
 
                 const option_3 = await prisma.solicitations.findFirst({
@@ -78,7 +78,7 @@ module.exports = async function capturedSatisfactionSurvey(
                         id: option_3.id,
                     },
                     data: {
-                        satisfaction: "muito bom",
+                        satisfaction: "Muito bom",
                     },
                 });
 
