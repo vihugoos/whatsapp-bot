@@ -23,7 +23,7 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
         "Liber Assessoria & Soluções"
     );
 
-    client.sendMessage(message.from, buttons);
+    await client.sendMessage(message.from, buttons);
 
     await prisma.users.update({
         where: {
