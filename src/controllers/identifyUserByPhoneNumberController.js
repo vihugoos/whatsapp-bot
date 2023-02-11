@@ -7,6 +7,8 @@ module.exports = async function identifyUserByPhoneNumberController(
 ) {
     if (message.from === "status@broadcast") return;
 
+    if (message.body == "") return;
+
     const phone_number = (await message.getContact()).number;
 
     let user = await prisma.users.findFirst({
