@@ -6,12 +6,12 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
     user,
     message
 ) {
-    client.sendMessage(
+    await client.sendMessage(
         message.from,
         "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje? 🩺✅👩🏻‍💻"
     );
 
-    client.sendMessage(
+    await client.sendMessage(
         message.from,
         "Verifiquei que esse número não está cadastrado em nosso sistema."
     );

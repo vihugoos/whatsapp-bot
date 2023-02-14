@@ -13,7 +13,7 @@ module.exports = async function requestedEmailStage(
     emailTypedByUser = message.body.toLowerCase();
 
     if (!validateEmail.test(emailTypedByUser)) {
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "E-mail inválido, por gentileza digite novamente."
         );
@@ -25,7 +25,7 @@ module.exports = async function requestedEmailStage(
         });
 
         if (emailAlreadyExists) {
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "Esse e-mail já existe em nosso sistema, por favor, tente novamente."
             );
@@ -39,14 +39,17 @@ module.exports = async function requestedEmailStage(
                 },
             });
 
-            client.sendMessage(message.from, "Cadastro realizado com sucesso!");
+            await client.sendMessage(
+                message.from,
+                "Cadastro realizado com sucesso!"
+            );
 
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "Você já está habilitado a requisitar nossos serviços."
             );
 
-            sendServiceOptions(client, message);
+            await sendServiceOptions(client, message);
 
             await prisma.users.update({
                 where: {

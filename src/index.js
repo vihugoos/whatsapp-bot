@@ -38,11 +38,11 @@ client.on("ready", () => {
 });
 
 client.on("message", async (message) => {
-    identifyUserByPhoneNumberController(client, prisma, message);
+    await identifyUserByPhoneNumberController(client, prisma, message);
 });
 
 client.on("message_create", async (message) => {
-    flagsController(client, prisma, message);
+    await flagsController(client, prisma, message);
 });
 
 client.on("group_join", (notification) => {
@@ -50,7 +50,7 @@ client.on("group_join", (notification) => {
 });
 
 client.on("call", async (call) => {
-    rejectCalls(client, call);
+    await rejectCalls(client, call);
 });
 
 client.on("change_state", (state) => {

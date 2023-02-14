@@ -13,7 +13,7 @@ module.exports = async function flagsController(client, prisma, message) {
         });
 
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
-            endedAttendanceFlag(client, prisma, user, message);
+            await endedAttendanceFlag(client, prisma, user, message);
         }
 
         if (
@@ -21,11 +21,11 @@ module.exports = async function flagsController(client, prisma, message) {
                 .toLowerCase()
                 .includes("prosseguimento no seu cadastro")
         ) {
-            proceedWithRegistrationFlag(client, prisma, user, message);
+            await proceedWithRegistrationFlag(client, prisma, user, message);
         }
 
         if (message.body.toLowerCase().includes("em que posso ajudar")) {
-            takeOverSolicitationFlag(prisma, user, message);
+            await takeOverSolicitationFlag(prisma, user, message);
         }
     }
 };

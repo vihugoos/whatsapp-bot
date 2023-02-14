@@ -7,7 +7,7 @@ module.exports = async function requestedRGStage(
     rgTypedByUser = message.body.replace(/[^\d]+/g, "");
 
     if (rgTypedByUser.length != 9) {
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "RG inválido (não possui 9 dígitos), por gentileza digite novamente."
         );
@@ -19,7 +19,7 @@ module.exports = async function requestedRGStage(
         });
 
         if (RGAlreadyExists) {
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "Esse RG já existe em nosso sistema, por favor, tente novamente."
             );
@@ -33,7 +33,7 @@ module.exports = async function requestedRGStage(
                 },
             });
 
-            client.sendMessage(message.from, "Digite seu *E-mail*.");
+            await client.sendMessage(message.from, "Digite seu *E-mail*.");
 
             await prisma.users.update({
                 where: {

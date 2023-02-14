@@ -48,7 +48,7 @@ module.exports = async function endedAttendanceFlag(
                 });
             }
 
-            sendSatisfactionSurvey(client, message);
+            await sendSatisfactionSurvey(client, message);
         } else {
             console.log("\n[wpp-bot]: Solicitation does not found");
         }

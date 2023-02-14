@@ -19,7 +19,7 @@ module.exports = async function requestedServiceNumberStage(
     const chosenNumber = message.body;
 
     if (!numbersService.includes(chosenNumber)) {
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "Número inválido, por favor tente novamente."
         );
@@ -55,27 +55,30 @@ module.exports = async function requestedServiceNumberStage(
         console.log("\n[wpp-bot]: Solicitation created with successfully");
         console.log("[wpp-bot]: Solicitation ID:", newSolicitation.id);
 
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             `Serviço número ${chosenNumber} selecionado.`
         );
 
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             `Protocolo de atendimento: *${newSolicitation.id}*`
         );
 
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "Enviarei sua solicitação para um de nossos atendentes. Aguarde um momento, você será atendido em breve."
         );
 
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "Se possível, por favor forneça mais detalhes sobre sua solicitação para que possamos avançar com o processo."
         );
 
-        client.sendMessage(message.from, "Caso prefira, nos envie um áudio.");
+        await client.sendMessage(
+            message.from,
+            "Caso prefira, nos envie um áudio."
+        );
 
         const client_name = (await message.getContact()).name;
 

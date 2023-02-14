@@ -19,12 +19,12 @@ module.exports = async function requestedFullNameStage(
         },
     });
 
-    client.sendMessage(
+    await client.sendMessage(
         message.from,
         `Obrigado, Dr(a) ${nameTypedByUser.split(" ")[0]}!`
     );
 
-    client.sendMessage(message.from, "Digite seu *CPF*.");
+    await client.sendMessage(message.from, "Digite seu *CPF*.");
 
     await prisma.users.update({
         where: {

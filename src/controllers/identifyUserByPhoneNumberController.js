@@ -31,5 +31,5 @@ module.exports = async function identifyUserByPhoneNumberController(
     console.log(`[wpp-bot]: Message from ${message.from}:`, message.body);
     console.log("[wpp-bot]: User ID:", user.id);
 
-    userStageController(client, prisma, user, message);
+    await userStageController(client, prisma, user, message);
 };

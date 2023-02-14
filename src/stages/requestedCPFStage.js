@@ -7,7 +7,7 @@ module.exports = async function requestedCPFStage(
     let cpfTypedByUser = message.body.replace(/[^\d]+/g, "");
 
     if (cpfTypedByUser.length != 11) {
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "CPF inválido (não possui 11 dígitos), por gentileza digite novamente."
         );
@@ -19,7 +19,7 @@ module.exports = async function requestedCPFStage(
         });
 
         if (CPFAlreadyExists) {
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "Esse CPF já existe em nosso sistema, por favor, tente novamente."
             );
@@ -33,7 +33,7 @@ module.exports = async function requestedCPFStage(
                 },
             });
 
-            client.sendMessage(message.from, "Digite seu *RG*.");
+            await client.sendMessage(message.from, "Digite seu *RG*.");
 
             await prisma.users.update({
                 where: {

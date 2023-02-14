@@ -9,7 +9,7 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
     let cpfToConfirmTypedByUser = message.body.replace(/[^\d]+/g, "");
 
     if (cpfToConfirmTypedByUser.length != 11) {
-        client.sendMessage(
+        await client.sendMessage(
             message.from,
             "CPF digitado incorretamente (não possui 11 dígitos), por gentileza digite novamente."
         );
@@ -21,12 +21,12 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
         });
 
         if (!previous_registration) {
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "*CPF* não encontrado em nossa base de dados."
             );
 
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "Por favor, aguarde alguns instantes que irei encaminha-lo a um de nossos atendentes para melhor análise do caso."
             );
@@ -55,19 +55,19 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
                 },
             });
 
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 `Dr(a) ${
                     userUpdated.name.split(" ")[0]
                 }, seu novo número de celular foi atualizado com sucesso!`
             );
 
-            client.sendMessage(
+            await client.sendMessage(
                 message.from,
                 "Você já está habilitado a requisitar nossos serviços novamente."
             );
 
-            sendServiceOptions(client, message);
+            await sendServiceOptions(client, message);
 
             await prisma.users.update({
                 where: {

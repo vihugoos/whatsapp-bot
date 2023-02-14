@@ -13,7 +13,10 @@ module.exports = async function proceedWithRegistrationFlag(
         },
     });
 
-    client.sendMessage(message.to, "Por gentileza digite seu *nome* completo.");
+    await client.sendMessage(
+        message.to,
+        "Por gentileza digite seu *nome* completo."
+    );
 
     console.log(`\n[wpp-bot]: Client unlocked for registration: ${message.to}`);
 };
