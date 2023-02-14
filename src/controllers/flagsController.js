@@ -1,5 +1,6 @@
 const endedAttendanceFlag = require("../flags/endedAttendanceFlag");
 const proceedWithRegistrationFlag = require("../flags/proceedWithRegistrationFlag");
+const takeOverSolicitationFlag = require("../flags/takeOverSolicitationFlag");
 
 module.exports = async function flagsController(client, prisma, message) {
     if (message.fromMe) {
@@ -21,6 +22,10 @@ module.exports = async function flagsController(client, prisma, message) {
                 .includes("prosseguimento no seu cadastro")
         ) {
             proceedWithRegistrationFlag(client, prisma, user, message);
+        }
+
+        if (message.body.toLowerCase().includes("em que posso ajudar")) {
+            takeOverSolicitationFlag(prisma, user, message);
         }
     }
 };
