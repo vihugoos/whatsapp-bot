@@ -5,7 +5,7 @@ module.exports = async function askedIfAlreadyClientLiberStage(
     message
 ) {
     if (message.body === "Já sou cliente Liber") {
-        await client.sendMessage(
+        client.sendMessage(
             message.from,
             "Por favor, informe seu *CPF* para confirmação."
         );
@@ -19,7 +19,7 @@ module.exports = async function askedIfAlreadyClientLiberStage(
             },
         });
     } else if (message.body === "Não sou cliente") {
-        await client.sendMessage(
+        client.sendMessage(
             message.from,
             "Por favor, aguarde alguns instantes enquanto nosso representante comercial entra em contato."
         );
@@ -33,7 +33,7 @@ module.exports = async function askedIfAlreadyClientLiberStage(
             },
         });
     } else {
-        await client.sendMessage(
+        client.sendMessage(
             message.from,
             "Resposta inválida, por gentileza selecione uma das opções acima."
         );

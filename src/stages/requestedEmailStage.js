@@ -1,4 +1,5 @@
 const sendServiceOptions = require("../lib/sendServiceOptions");
+const sleep = require("../utils/sleep");
 
 module.exports = async function requestedEmailStage(
     client,
@@ -13,7 +14,7 @@ module.exports = async function requestedEmailStage(
     emailTypedByUser = message.body.toLowerCase();
 
     if (!validateEmail.test(emailTypedByUser)) {
-        await client.sendMessage(
+        client.sendMessage(
             message.from,
             "E-mail inválido, por gentileza digite novamente."
         );
@@ -25,7 +26,7 @@ module.exports = async function requestedEmailStage(
         });
 
         if (emailAlreadyExists) {
-            await client.sendMessage(
+            client.sendMessage(
                 message.from,
                 "Esse e-mail já existe em nosso sistema, por favor, tente novamente."
             );
@@ -39,17 +40,16 @@ module.exports = async function requestedEmailStage(
                 },
             });
 
-            await client.sendMessage(
+            client.sendMessage(message.from, "Cadastro realizado com sucesso!");
+
+            await sleep(1000);
+
+            client.sendMessage(
                 message.from,
-                "Cadastro realizado com sucesso!"
+                "Você já está habilitado(a) a requisitar nossos serviços."
             );
 
-            await client.sendMessage(
-                message.from,
-                "Você já está habilitado a requisitar nossos serviços."
-            );
-
-            await sendServiceOptions(client, message);
+            sendServiceOptions(client, message);
 
             await prisma.users.update({
                 where: {

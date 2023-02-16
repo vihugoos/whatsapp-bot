@@ -1,4 +1,5 @@
 const { Buttons } = require("whatsapp-web.js");
+const sleep = require("../utils/sleep");
 
 module.exports = async function userWithoutRegistrationWithoutSessionStage(
     client,
@@ -6,15 +7,19 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
     user,
     message
 ) {
-    await client.sendMessage(
+    client.sendMessage(
         message.from,
         "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje? 🩺✅👩🏻‍💻"
     );
 
-    await client.sendMessage(
+    await sleep(1000);
+
+    client.sendMessage(
         message.from,
         "Verifiquei que esse número não está cadastrado em nosso sistema."
     );
+
+    await sleep(1000);
 
     const buttons = new Buttons(
         "Selecione uma das opções abaixo.",
@@ -23,7 +28,7 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
         "Liber Assessoria & Soluções"
     );
 
-    await client.sendMessage(message.from, buttons);
+    client.sendMessage(message.from, buttons);
 
     await prisma.users.update({
         where: {

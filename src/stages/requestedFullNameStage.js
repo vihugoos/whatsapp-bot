@@ -1,4 +1,5 @@
 const convertToTitleCase = require("../utils/convertToTitleCase");
+const sleep = require("../utils/sleep");
 
 module.exports = async function requestedFullNameStage(
     client,
@@ -19,12 +20,14 @@ module.exports = async function requestedFullNameStage(
         },
     });
 
-    await client.sendMessage(
+    client.sendMessage(
         message.from,
         `Obrigado, Dr(a) ${nameTypedByUser.split(" ")[0]}!`
     );
 
-    await client.sendMessage(message.from, "Digite seu *CPF*.");
+    await sleep(1000);
+
+    client.sendMessage(message.from, "Digite seu *CPF*.");
 
     await prisma.users.update({
         where: {
