@@ -23,6 +23,9 @@ module.exports = async function identifyUserByPhoneNumberController(
         user = await prisma.users.create({
             data: {
                 phone_number,
+                created_at: new Date().toLocaleString("pt-BR", {
+                    timeZone: "America/Sao_Paulo",
+                }),
             },
         });
     }
