@@ -8,13 +8,14 @@ datasource db {
 }
 
 model Users {
-  id           String  @id @default(uuid())
+  id           String   @id @default(uuid())
   name         String?
-  cpf          String? @unique
-  rg           String? @unique
-  email        String? @unique
-  phone_number String  @unique
+  cpf          String?  @unique
+  rg           String?  @unique
+  email        String?  @unique
+  phone_number String   @unique
   stage        String?
+  created_at   DateTime @default(now())
 
   solicitations Solicitations[]
 
@@ -22,11 +23,12 @@ model Users {
 }
 
 model Attendants {
-  id               String  @id @default(uuid())
+  id               String   @id @default(uuid())
   name             String
-  discord_username String  @unique
-  discord_user_id  String  @unique
-  in_attendance    Boolean @default(false)
+  discord_username String   @unique
+  discord_user_id  String   @unique
+  in_attendance    Boolean  @default(false)
+  created_at       DateTime @default(now())
 
   solicitations Solicitations[]
 
