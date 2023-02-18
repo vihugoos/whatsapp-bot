@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Users {
-  id           String   @id @default(uuid())
-  name         String?
-  cpf          String?  @unique
-  rg           String?  @unique
-  email        String?  @unique
-  phone_number String   @unique
-  stage        String?
-  created_at   DateTime @default(now())
+  id             String   @id @default(uuid())
+  name           String?
+  cpf            String?  @unique
+  rg             String?  @unique
+  email          String?  @unique
+  phone_number   String   @unique
+  stage          String?
+  created_at     String
+  bot_created_at DateTime @default(now())
 
   solicitations Solicitations[]
 
