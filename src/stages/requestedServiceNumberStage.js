@@ -1,4 +1,4 @@
-const sendMessageToDiscordChannel = require("../webhooks/discord");
+const sendNewSolicitationToDiscordChannel = require("../webhooks/discord");
 const sleep = require("../utils/sleep");
 
 module.exports = async function requestedServiceNumberStage(
@@ -88,7 +88,7 @@ module.exports = async function requestedServiceNumberStage(
 
         const client_name = (await message.getContact()).name;
 
-        await sendMessageToDiscordChannel({
+        await sendNewSolicitationToDiscordChannel({
             client_name,
             chosen_service: listServices[chosenNumber - 1],
             protocol: newSolicitation.id,

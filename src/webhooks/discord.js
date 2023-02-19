@@ -1,7 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 
-module.exports = async function sendMessageToDiscordChannel({
+module.exports = async function sendNewSolicitationToDiscordChannel({
     client_name,
     chosen_service,
     protocol,
