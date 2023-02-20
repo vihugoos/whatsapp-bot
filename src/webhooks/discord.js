@@ -29,6 +29,12 @@ async function sendNewSolicitationToDiscordChannel({
     });
 }
 
+async function sendSolicitationClosedToDiscordChannel(protocol) {
+    await axios.post(process.env.DISCORD_WEBHOOK_URL_CLOSED_SOLICITATIONS, {
+        content: `Protocolo: **${protocol}**, solicitação fechada! ✅`,
+    });
+}
+
 async function sendNewNonCustomerContactToDiscordChannel(
     user_id,
     phone_number
@@ -49,5 +55,6 @@ async function sendNewNonCustomerContactToDiscordChannel(
 
 module.exports = {
     sendNewSolicitationToDiscordChannel,
+    sendSolicitationClosedToDiscordChannel,
     sendNewNonCustomerContactToDiscordChannel,
 };
