@@ -1,5 +1,8 @@
 const sendServiceOptions = require("../lib/sendServiceOptions");
 const sleep = require("../utils/sleep");
+const {
+    sendNewNonCustomerContactToDiscordChannel,
+} = require("../webhooks/discord");
 
 module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
     client,
@@ -42,6 +45,11 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
                     stage: "in_attendance",
                 },
             });
+
+            await sendNewNonCustomerContactToDiscordChannel(
+                user.id,
+                user.phone_number
+            );
         } else {
             await prisma.users.delete({
                 where: {

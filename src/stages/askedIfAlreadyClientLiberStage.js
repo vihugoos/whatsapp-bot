@@ -1,3 +1,7 @@
+const {
+    sendNewNonCustomerContactToDiscordChannel,
+} = require("../webhooks/discord");
+
 module.exports = async function askedIfAlreadyClientLiberStage(
     client,
     prisma,
@@ -32,6 +36,11 @@ module.exports = async function askedIfAlreadyClientLiberStage(
                 stage: "in_attendance",
             },
         });
+
+        await sendNewNonCustomerContactToDiscordChannel(
+            user.id,
+            user.phone_number
+        );
     } else {
         client.sendMessage(
             message.from,
