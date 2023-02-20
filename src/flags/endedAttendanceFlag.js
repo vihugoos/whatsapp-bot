@@ -1,3 +1,6 @@
+const {
+    sendSolicitationClosedToDiscordChannel,
+} = require("../webhooks/discord");
 const sendSatisfactionSurvey = require("../lib/sendSatisfactionSurvey");
 
 module.exports = async function endedAttendanceFlag(
@@ -34,7 +37,7 @@ module.exports = async function endedAttendanceFlag(
                 },
             });
 
-            console.log("\n[wpp-bot]: Solicitation closed");
+            console.log("\n[wpp-bot]: Solicitation closed!");
             console.log("[wpp-bot]: Solicitation ID:", solicitationClosed.id);
 
             if (solicitationClosed.attendant_id) {
@@ -47,6 +50,8 @@ module.exports = async function endedAttendanceFlag(
                     },
                 });
             }
+
+            await sendSolicitationClosedToDiscordChannel(solicitationClosed.id);
 
             sendSatisfactionSurvey(client, message);
         } else {
