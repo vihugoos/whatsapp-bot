@@ -21,7 +21,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
           source: "./"
-          target: "~/wpp-bot"
+          target: "~/app/wpp-bot"
           
     - name: Update wpp-bot
       uses: appleboy/ssh-action@master
@@ -31,7 +31,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-              cd ~/wpp-bot
+              cd ~/app/wpp-bot
               git pull
               npx prisma generate
               pm2 restart wpp-bot
