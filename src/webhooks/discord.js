@@ -1,13 +1,14 @@
 require("dotenv").config();
-const axios = require("axios");
 
-module.exports = async function sendNewSolicitationToDiscordChannel({
+const axios = require("axios");
+const discord_core_role = "1067573586363162815";
+
+async function sendNewSolicitationToDiscordChannel({
     client_name,
     chosen_service,
     protocol,
     discord_user_id,
 }) {
-    const discord_core_role = "1067573586363162815";
     let message;
 
     if (discord_user_id) {
@@ -16,7 +17,7 @@ module.exports = async function sendNewSolicitationToDiscordChannel({
         message = `**AVISO:** Esta solicitação não foi atribuída a ninguém! <@&${discord_core_role}>`;
     }
 
-    await axios.post(process.env.DISCORD_WEBHOOK_URL, {
+    await axios.post(process.env.DISCORD_WEBHOOK_URL_OPEN_SOLICITATIONS, {
         content: message,
         embeds: [
             {
@@ -26,4 +27,27 @@ module.exports = async function sendNewSolicitationToDiscordChannel({
             },
         ],
     });
+}
+
+async function sendNewNonCustomerContactToDiscordChannel(
+    user_id,
+    phone_number
+) {
+    let message = `Novo contato de um Não-Cliente! <@&${discord_core_role}>`;
+
+    await axios.post(process.env.DISCORD_WEBHOOK_URL_NON_CUSTOMERS, {
+        content: message,
+        embeds: [
+            {
+                title: `Novo contato de ${phone_number}`,
+                description: `Status: **Em Atendimento**\nID: **${user_id}**`,
+                color: 7506394,
+            },
+        ],
+    });
+}
+
+module.exports = {
+    sendNewSolicitationToDiscordChannel,
+    sendNewNonCustomerContactToDiscordChannel,
 };
