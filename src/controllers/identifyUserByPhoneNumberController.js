@@ -1,4 +1,5 @@
 const userStageController = require("./userStageController");
+const isOutsideBusinessHours = require("../lib/isOutsideBusinessHours");
 
 module.exports = async function identifyUserByPhoneNumberController(
     client,
@@ -8,6 +9,8 @@ module.exports = async function identifyUserByPhoneNumberController(
     if (message.from === "status@broadcast") return;
 
     if (message.body == "") return;
+
+    if (isOutsideBusinessHours()) return;
 
     const phone_number = (await message.getContact()).number;
 
