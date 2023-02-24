@@ -12,7 +12,7 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
         "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje? 🩺✅👩🏻‍💻"
     );
 
-    await sleep(1000);
+    await sleep(1100);
 
     client.sendMessage(
         message.from,
