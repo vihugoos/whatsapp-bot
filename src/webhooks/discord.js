@@ -31,7 +31,14 @@ async function sendNewSolicitationToDiscordChannel({
 
 async function sendSolicitationClosedToDiscordChannel(protocol) {
     await axios.post(process.env.DISCORD_WEBHOOK_URL_CLOSED_SOLICITATIONS, {
-        content: `Protocolo: **${protocol}**, solicitação fechada! ✅`,
+        embeds: [
+            {
+                title: `Protocolo: ${protocol}`,
+                description:
+                    "✅ﾠSolicitação fechada com sucesso!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ",
+                color: 7506394,
+            },
+        ],
     });
 }
 
