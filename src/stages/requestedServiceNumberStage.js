@@ -99,6 +99,7 @@ module.exports = async function requestedServiceNumberStage(
 
         await sendNewSolicitationToDiscordChannel({
             client_name,
+            phone_number: user.phone_number,
             chosen_service: listServices[chosenNumber - 1],
             protocol: newSolicitation.id,
             discord_user_id: attendant ? attendant.discord_user_id : null,
