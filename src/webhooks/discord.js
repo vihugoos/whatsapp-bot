@@ -5,6 +5,7 @@ const discord_core_role = "1067573586363162815";
 
 async function sendNewSolicitationToDiscordChannel({
     client_name,
+    phone_number,
     chosen_service,
     protocol,
     discord_user_id,
@@ -22,7 +23,7 @@ async function sendNewSolicitationToDiscordChannel({
         embeds: [
             {
                 title: `Nova solicitação de ${client_name}`,
-                description: `Serviço escolhido: **${chosen_service}**\nProtocolo de atendimento: **${protocol}**`,
+                description: `Celular: **${phone_number}**ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤﾠ\nServiço escolhido: **${chosen_service}**\nProtocolo: **${protocol}**`,
                 color: 4437377,
             },
         ],
@@ -53,8 +54,8 @@ async function sendNewNonCustomerContactToDiscordChannel(
         embeds: [
             {
                 title: `Novo contato de ${phone_number}`,
-                description: `Status: **Em Atendimento**\nID: **${user_id}**`,
-                color: 7506394,
+                description: `Status: **Em Atendimento**ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\nID: **${user_id}**`,
+                color: 16426522,
             },
         ],
     });
