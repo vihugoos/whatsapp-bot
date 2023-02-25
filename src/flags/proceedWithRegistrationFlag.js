@@ -1,8 +1,11 @@
+const sleep = require("../utils/sleep");
+
 module.exports = async function proceedWithRegistrationFlag(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     await prisma.users.update({
         where: {
@@ -12,6 +15,10 @@ module.exports = async function proceedWithRegistrationFlag(
             stage: "requestedFullName",
         },
     });
+
+    chat.sendStateTyping();
+
+    await sleep(1500);
 
     client.sendMessage(message.to, "Por gentileza digite seu *nome* completo.");
 

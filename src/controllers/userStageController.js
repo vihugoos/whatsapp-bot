@@ -13,7 +13,8 @@ module.exports = async function userStageController(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     const USER_WITHOUT_SESSION = null;
     const USER_WITHOUT_REGISTRATION = !user.cpf ? true : false;
@@ -27,7 +28,8 @@ module.exports = async function userStageController(
                 client,
                 prisma,
                 user,
-                message
+                message,
+                chat
             );
         }
     }
@@ -38,12 +40,19 @@ module.exports = async function userStageController(
                 client,
                 prisma,
                 user,
-                message
+                message,
+                chat
             );
         }
 
         if (user.stage === "askedIfAlreadyClientLiber") {
-            await askedIfAlreadyClientLiberStage(client, prisma, user, message);
+            await askedIfAlreadyClientLiberStage(
+                client,
+                prisma,
+                user,
+                message,
+                chat
+            );
         }
 
         if (user.stage === "requestedCPFToConfirmPreviousRegistration") {
@@ -51,28 +60,29 @@ module.exports = async function userStageController(
                 client,
                 prisma,
                 user,
-                message
+                message,
+                chat
             );
         }
     }
 
     if (user.stage === "requestedFullName") {
-        await requestedFullNameStage(client, prisma, user, message);
+        await requestedFullNameStage(client, prisma, user, message, chat);
     }
 
     if (user.stage === "requestedCPF") {
-        await requestedCPFStage(client, prisma, user, message);
+        await requestedCPFStage(client, prisma, user, message, chat);
     }
 
     if (user.stage === "requestedRG") {
-        await requestedRGStage(client, prisma, user, message);
+        await requestedRGStage(client, prisma, user, message, chat);
     }
 
     if (user.stage === "requestedEmail") {
-        await requestedEmailStage(client, prisma, user, message);
+        await requestedEmailStage(client, prisma, user, message, chat);
     }
 
     if (user.stage === "requestedServiceNumber") {
-        await requestedServiceNumberStage(client, prisma, user, message);
+        await requestedServiceNumberStage(client, prisma, user, message, chat);
     }
 };

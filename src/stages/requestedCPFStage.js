@@ -1,12 +1,19 @@
+const sleep = require("../utils/sleep");
+
 module.exports = async function requestedCPFStage(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     let cpfTypedByUser = message.body.replace(/[^\d]+/g, "");
 
     if (cpfTypedByUser.length != 11) {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "CPF inválido (não possui 11 dígitos), por gentileza digite novamente."
@@ -19,6 +26,10 @@ module.exports = async function requestedCPFStage(
         });
 
         if (CPFAlreadyExists) {
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
             client.sendMessage(
                 message.from,
                 "Esse CPF já existe em nosso sistema, por favor, tente novamente."
@@ -32,6 +43,10 @@ module.exports = async function requestedCPFStage(
                     cpf: cpfTypedByUser,
                 },
             });
+
+            chat.sendStateTyping();
+
+            await sleep(1500);
 
             client.sendMessage(message.from, "Digite seu *RG*.");
 

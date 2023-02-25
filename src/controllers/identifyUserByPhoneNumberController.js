@@ -37,5 +37,11 @@ module.exports = async function identifyUserByPhoneNumberController(
     console.log(`[wpp-bot]: Message from ${message.from}:`, message.body);
     console.log("[wpp-bot]: User ID:", user.id);
 
-    await userStageController(client, prisma, user, message);
+    let chat = await message.getChat();
+
+    if (!user.stage === "in_attendance") {
+        chat.sendSeen();
+    }
+
+    await userStageController(client, prisma, user, message, chat);
 };

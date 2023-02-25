@@ -5,7 +5,8 @@ module.exports = async function requestedServiceNumberStage(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     const listServices = [
         "Veículo",
@@ -20,11 +21,17 @@ module.exports = async function requestedServiceNumberStage(
     const chosenNumber = message.body;
 
     if (!numbersService.includes(chosenNumber)) {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "Número inválido, por favor tente novamente."
         );
     } else {
+        message.react("👍🏼");
+
         const attendant = await prisma.attendants.findFirst({
             where: {
                 in_attendance: false,
@@ -56,12 +63,20 @@ module.exports = async function requestedServiceNumberStage(
         console.log("\n[wpp-bot]: Solicitation created with successfully");
         console.log("[wpp-bot]: Solicitation ID:", newSolicitation.id);
 
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             `Serviço número ${chosenNumber} selecionado.`
         );
 
         await sleep(1000);
+
+        chat.sendStateTyping();
+
+        await sleep(1500);
 
         client.sendMessage(
             message.from,
@@ -70,6 +85,10 @@ module.exports = async function requestedServiceNumberStage(
 
         await sleep(1000);
 
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "Enviarei sua solicitação para um de nossos atendentes. Aguarde um momento, você será atendido em breve."
@@ -77,12 +96,20 @@ module.exports = async function requestedServiceNumberStage(
 
         await sleep(1000);
 
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "Se possível, por favor forneça mais detalhes sobre sua solicitação para que possamos avançar com o processo."
         );
 
         await sleep(1000);
+
+        chat.sendStateTyping();
+
+        await sleep(1500);
 
         client.sendMessage(message.from, "Caso prefira, nos envie um áudio.");
 

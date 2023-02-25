@@ -1,14 +1,20 @@
 const {
     sendNewNonCustomerContactToDiscordChannel,
 } = require("../webhooks/discord");
+const sleep = require("../utils/sleep");
 
 module.exports = async function askedIfAlreadyClientLiberStage(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     if (message.body === "Já sou cliente Liber") {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "Por favor, informe seu *CPF* para confirmação."
@@ -23,6 +29,10 @@ module.exports = async function askedIfAlreadyClientLiberStage(
             },
         });
     } else if (message.body === "Não sou cliente") {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "Por favor, aguarde alguns instantes enquanto nosso representante comercial entra em contato."
@@ -42,6 +52,10 @@ module.exports = async function askedIfAlreadyClientLiberStage(
             user.phone_number
         );
     } else {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "Resposta inválida, por gentileza selecione uma das opções acima."

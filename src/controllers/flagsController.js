@@ -4,6 +4,8 @@ const takeOverSolicitationFlag = require("../flags/takeOverSolicitationFlag");
 
 module.exports = async function flagsController(client, prisma, message) {
     if (message.fromMe) {
+        let chat = await message.getChat();
+
         const phone_number = message.to.replace(/[^\d]+/g, "");
 
         const user = await prisma.users.findFirst({
@@ -13,7 +15,7 @@ module.exports = async function flagsController(client, prisma, message) {
         });
 
         if (message.body.toLowerCase().includes("atendimento finalizado")) {
-            await endedAttendanceFlag(client, prisma, user, message);
+            await endedAttendanceFlag(client, prisma, user, message, chat);
         }
 
         if (
@@ -21,7 +23,13 @@ module.exports = async function flagsController(client, prisma, message) {
                 .toLowerCase()
                 .includes("prosseguimento no seu cadastro")
         ) {
-            await proceedWithRegistrationFlag(client, prisma, user, message);
+            await proceedWithRegistrationFlag(
+                client,
+                prisma,
+                user,
+                message,
+                chat
+            );
         }
 
         if (message.body.toLowerCase().includes("em que posso ajudar")) {

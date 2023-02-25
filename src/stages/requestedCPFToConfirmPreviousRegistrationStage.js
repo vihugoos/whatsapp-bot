@@ -8,11 +8,16 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     let cpfToConfirmTypedByUser = message.body.replace(/[^\d]+/g, "");
 
     if (cpfToConfirmTypedByUser.length != 11) {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "CPF digitado incorretamente (não possui 11 dígitos), por gentileza digite novamente."
@@ -25,12 +30,20 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
         });
 
         if (!previous_registration) {
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
             client.sendMessage(
                 message.from,
                 "*CPF* não encontrado em nossa base de dados."
             );
 
             await sleep(1000);
+
+            chat.sendStateTyping();
+
+            await sleep(1500);
 
             client.sendMessage(
                 message.from,
@@ -66,6 +79,10 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
                 },
             });
 
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
             client.sendMessage(
                 message.from,
                 `Dr(a) ${
@@ -75,12 +92,18 @@ module.exports = async function requestedCPFToConfirmPreviousRegistrationStage(
 
             await sleep(1000);
 
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
             client.sendMessage(
                 message.from,
                 "Você já está habilitado(a) a requisitar nossos serviços novamente."
             );
 
-            sendServiceOptions(client, message);
+            await sleep(1000);
+
+            await sendServiceOptions(client, message, chat);
 
             await prisma.users.update({
                 where: {

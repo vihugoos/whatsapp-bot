@@ -1,6 +1,11 @@
 const { Buttons } = require("whatsapp-web.js");
+const sleep = require("../utils/sleep");
 
-module.exports = function sendSatisfactionSurvey(client, message) {
+module.exports = async function sendSatisfactionSurvey(client, message, chat) {
+    chat.sendStateTyping();
+
+    await sleep(1500);
+
     const satisfactionSurvey = new Buttons(
         "Ajude-nos a melhorar nossos serviços e atendimento respondendo à nossa pesquisa de satisfação. Sua colaboração é muito importante para nós. Obrigado! 🩺✅",
         [{ body: "Ruim" }, { body: "Bom" }, { body: "Muito bom" }],

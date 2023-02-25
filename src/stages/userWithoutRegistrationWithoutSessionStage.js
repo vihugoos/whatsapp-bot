@@ -5,14 +5,23 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
+    chat.sendStateTyping();
+
+    await sleep(1500);
+
     client.sendMessage(
         message.from,
         "Olá! Eu sou a assistente virtual da Liber, pronta para agilizar seu atendimento e torná-lo ainda mais eficiente. Como posso ajudá-lo(a) hoje? 🩺✅👩🏻‍💻"
     );
 
-    await sleep(1100);
+    await sleep(1000);
+
+    chat.sendStateTyping();
+
+    await sleep(1500);
 
     client.sendMessage(
         message.from,
@@ -20,6 +29,10 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
     );
 
     await sleep(1000);
+
+    chat.sendStateTyping();
+
+    await sleep(1500);
 
     const buttons = new Buttons(
         "Selecione uma das opções abaixo.",

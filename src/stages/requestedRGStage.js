@@ -1,12 +1,19 @@
+const sleep = require("../utils/sleep");
+
 module.exports = async function requestedRGStage(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     rgTypedByUser = message.body.replace(/[^\d]+/g, "");
 
     if (rgTypedByUser.length != 9) {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
         client.sendMessage(
             message.from,
             "RG inválido (não possui 9 dígitos), por gentileza digite novamente."
@@ -19,6 +26,10 @@ module.exports = async function requestedRGStage(
         });
 
         if (RGAlreadyExists) {
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
             client.sendMessage(
                 message.from,
                 "Esse RG já existe em nosso sistema, por favor, tente novamente."
@@ -32,6 +43,10 @@ module.exports = async function requestedRGStage(
                     rg: rgTypedByUser,
                 },
             });
+
+            chat.sendStateTyping();
+
+            await sleep(1500);
 
             client.sendMessage(message.from, "Digite seu *E-mail*.");
 

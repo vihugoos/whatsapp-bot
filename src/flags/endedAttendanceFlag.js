@@ -7,7 +7,8 @@ module.exports = async function endedAttendanceFlag(
     client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
     console.log("\n[wpp-bot]: endedAttendanceFlag() called");
 
@@ -53,7 +54,7 @@ module.exports = async function endedAttendanceFlag(
 
             await sendSolicitationClosedToDiscordChannel(solicitationClosed.id);
 
-            sendSatisfactionSurvey(client, message);
+            await sendSatisfactionSurvey(client, message, chat);
         } else {
             console.log("\n[wpp-bot]: Solicitation does not found");
         }
