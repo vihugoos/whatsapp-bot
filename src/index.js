@@ -4,6 +4,7 @@ const qrcode = require("qrcode-terminal");
 const identifyUserByPhoneNumberController = require("./controllers/identifyUserByPhoneNumberController");
 const flagsController = require("./controllers/flagsController");
 const rejectCalls = require("./lib/rejectCalls");
+const leaveTheGroup = require("./lib/leaveTheGroup");
 
 const prisma = require("./database/prisma-client");
 
@@ -45,8 +46,8 @@ client.on("message_create", async (message) => {
     await flagsController(client, prisma, message);
 });
 
-client.on("group_join", (notification) => {
-    console.log("\n[wpp-bot]: bot joined the group:", notification);
+client.on("group_join", async (notification) => {
+    await leaveTheGroup(notification);
 });
 
 client.on("call", async (call) => {
