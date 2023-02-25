@@ -1,11 +1,23 @@
 module.exports = function isOutsideBusinessHours() {
-    const date = new Date().toLocaleString("pt-BR", {
-        timeZone: "America/Sao_Paulo",
-    });
+    const hourNow = Number(
+        new Date()
+            .toLocaleString("pt-BR", {
+                timeZone: "America/Sao_Paulo",
+            })
+            .split(" ")[1]
+            .split(":")[0]
+    );
 
-    const hourNow = Number(date.split(" ")[1].split(":")[0]);
+    const dayWeek = Number(
+        new Date().getDay().toLocaleString("pt-BR", {
+            timeZone: "America/Sao_Paulo",
+        })
+    );
 
-    if (hourNow < 8 || hourNow >= 18) {
+    if (dayWeek === 0 || dayWeek === 6) {
+        console.log("\n[wpp-bot]: Weekend!");
+        return true;
+    } else if (hourNow < 8 || hourNow >= 18) {
         console.log("\n[wpp-bot]: Outside business hours!");
         return true;
     } else {
