@@ -89,7 +89,7 @@ To get started, you need to have <strong>Node.js 18+</strong> installed on your 
 
 ### Prerequisites 
 
-Other than Node.js and Docker installed, no prerequisites are needed to install the application.
+Other than Node.js and Docker installed, you also need to have Google Chrome installed, because the library for automating whatsapp uses puppeteer to launch and control the browser, for more information visit <a href="https://www.google.com/chrome/">Google Chrome Download</a>. 
 
 
 ### Installation 
