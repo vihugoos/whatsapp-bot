@@ -43,7 +43,7 @@
 ## About The Project 
 
 <img src="" align="center" alt="Project Home Page">
-A bot for whatsapp to perform an automatic pre-service to the customer, automatically registering, opening and assigning solicitations to Liber employees.
+A bot for whatsapp to perform an automatic pre-service to the customer, automatically registering customers, opening and assigning solicitations to Liber employees.
 
 
 ### Built With 
