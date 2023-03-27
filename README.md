@@ -42,7 +42,11 @@
 <!---- THE PROJECT ---->
 ## About The Project 
 
-<img src="" align="center" alt="Project Home Page">
+<div align="center">
+  <video preload controls loop type="video/mp4" height="500" src="https://user-images.githubusercontent.com/44311634/228022341-939d4c83-2842-4efb-9f65-7ac07cee8398.mp4">
+    Sorry, your browser does not support embedded videos.
+  </video>
+</div>
 A bot for whatsapp to perform an automatic pre-service to the customer, registration of new customers, opening and assigning solicitations to Liber employees. Integration with Discord through Webhooks, to notify in real time when there are new customer solicitation and mark the responsible person, in addition to notifying new non-customer contacts and identify when a solicitation was closed to send in the closed solicitations channel, along with the service protocol. 
 
 
