@@ -34,14 +34,20 @@ module.exports = async function userWithoutRegistrationWithoutSessionStage(
 
     await sleep(1500);
 
-    const buttons = new Buttons(
-        "Selecione uma das opções abaixo.",
-        [{ body: "Já sou cliente Liber" }, { body: "Não sou cliente" }],
-        "Pré-atendimento Automático",
-        "Liber Assessoria & Soluções"
-    );
+    // const buttons = new Buttons(
+    //     "Selecione uma das opções abaixo.",
+    //     [{ body: "Já sou cliente Liber" }, { body: "Não sou cliente" }],
+    //     "Pré-atendimento Automático",
+    //     "Liber Assessoria & Soluções"
+    // );
 
-    client.sendMessage(message.from, buttons);
+    // client.sendMessage(message.from, buttons);
+
+    // Code temporary
+    client.sendMessage(
+        message.from,
+        "Escolha uma das opções:\n\n*1*. Já sou cliente Liber\n*2*. Não sou cliente"
+    );
 
     await prisma.users.update({
         where: {

@@ -10,7 +10,8 @@ module.exports = async function askedIfAlreadyClientLiberStage(
     message,
     chat
 ) {
-    if (message.body === "Já sou cliente Liber") {
+    // if (message.body === "Já sou cliente Liber") {
+    if (message.body === "1") {
         chat.sendStateTyping();
 
         await sleep(1500);
@@ -28,7 +29,8 @@ module.exports = async function askedIfAlreadyClientLiberStage(
                 stage: "requestedCPFToConfirmPreviousRegistration",
             },
         });
-    } else if (message.body === "Não sou cliente") {
+        // } else if (message.body === "Não sou cliente") {
+    } else if (message.body === "2") {
         chat.sendStateTyping();
 
         await sleep(1500);
