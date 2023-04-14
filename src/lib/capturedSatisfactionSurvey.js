@@ -1,9 +1,13 @@
+const sleep = require("../utils/sleep");
+
 module.exports = async function capturedSatisfactionSurvey(
+    client,
     prisma,
     user,
-    message
+    message,
+    chat
 ) {
-    console.log("Verificando se o usuário respondeu a pesquisa...");
+    const validateIfIsNumber = /^\d+$/;
 
     // if (message.hasQuotedMsg) {
     switch (message.body) {
@@ -33,6 +37,15 @@ module.exports = async function capturedSatisfactionSurvey(
                 },
             });
 
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
+            client.sendMessage(
+                message.from,
+                "Obrigado pelo feedback Dr(a), até a próxima!"
+            );
+
             return true;
         // case "Bom":
         case "2":
@@ -59,6 +72,15 @@ module.exports = async function capturedSatisfactionSurvey(
                     satisfaction: "Bom",
                 },
             });
+
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
+            client.sendMessage(
+                message.from,
+                "Obrigado pelo feedback Dr(a), até a próxima!"
+            );
 
             return true;
         // case "Muito bom":
@@ -87,8 +109,30 @@ module.exports = async function capturedSatisfactionSurvey(
                 },
             });
 
+            chat.sendStateTyping();
+
+            await sleep(1500);
+
+            client.sendMessage(
+                message.from,
+                "Obrigado pelo feedback Dr(a), até a próxima!"
+            );
+
             return true;
         default:
+            if (validateIfIsNumber.test(message.body)) {
+                chat.sendStateTyping();
+
+                await sleep(1500);
+
+                client.sendMessage(
+                    message.from,
+                    "Caso esteja respondendo a pesquisa de satisfação, por gentiliza digite um dos números acima."
+                );
+
+                return true;
+            }
+
             return false;
     }
     // } else {

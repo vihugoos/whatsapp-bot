@@ -22,7 +22,17 @@ module.exports = async function userStageController(
 
     if (USER_HAS_REGISTRATION) {
         if (user.stage === USER_WITHOUT_SESSION) {
-            if (await capturedSatisfactionSurvey(prisma, user, message)) return;
+            if (
+                await capturedSatisfactionSurvey(
+                    client,
+                    prisma,
+                    user,
+                    message,
+                    chat
+                )
+            ) {
+                return;
+            }
 
             await userAlreadyRegisteredWithoutSessionStage(
                 client,
