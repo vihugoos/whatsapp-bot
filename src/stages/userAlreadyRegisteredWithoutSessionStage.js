@@ -1,4 +1,5 @@
 const sendServiceOptions = require("../lib/sendServiceOptions");
+const isOutsideBusinessHours = require("../lib/isOutsideBusinessHours");
 const sleep = require("../utils/sleep");
 
 module.exports = async function userAlreadyRegisteredWithoutSessionStage(
@@ -20,6 +21,30 @@ module.exports = async function userAlreadyRegisteredWithoutSessionStage(
     );
 
     await sleep(1000);
+
+    if (isOutsideBusinessHours()) {
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
+        client.sendMessage(
+            message.from,
+            "*No momento, estamos fora do horário comercial e não temos atendentes disponíveis.*"
+        );
+
+        await sleep(1000);
+
+        chat.sendStateTyping();
+
+        await sleep(1500);
+
+        client.sendMessage(
+            message.from,
+            "No entanto, prosseguirei com seu pré-atendimento para agilizar sua solicitação. Assim que houver um atendente disponível, ele assumirá com todas as informações necessárias em mãos e dará continuidade ao atendimento."
+        );
+
+        await sleep(1000);
+    }
 
     chat.sendStateTyping();
 
