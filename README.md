@@ -162,26 +162,26 @@ With the installation complete, we can start the project.
 
 ### Standard Flows 
 
-1. Selecting "I'm not a customer", the bot sends this case to our commercial representative, who will later be able to release the registration if the payment is approved.
+1. Selecting "Não sou cliente", the bot sends this case to our commercial representative, who will later be able to release the registration if the payment is approved.
 
 2. If the registration is released, the bot will request all the necessary data and will register automatically (also already validating if the data entered are correct). 
 
 3. Customer sends any message, the bot identifies him by cell phone number and sends service options immediately.
 
-4. The customer has changed his number and selects the option "I am already a customer", the CPF is requested for confirmation and the registration is automatically updated.
+4. The customer has changed his number and selects the option "Já sou cliente", the CPF is requested for confirmation and the registration is automatically updated.
 
-5. Selecting "I'm already a customer", but the CPF was not found in the database, the case is sent for assistance and further analysis. 
+5. Selecting "Já sou cliente", but the CPF was not found in the database, the case is sent for assistance and further analysis. 
 
 <br/> 
 
 
 ### Flags
 
-* <strong>"finalized service"</strong>: If any Liber attendant sends a message that has these two words included, the bot ends the service. 
+* <strong>"atendimento finalizado"</strong>: If any Liber attendant sends a message that has these two words included, the bot ends the service. 
 
-* <strong>"continuing your registration"</strong>: If our sales representative sends a message that includes this phrase, the bot will take over from here and automatically proceed with the registration of the new customer.
+* <strong>"prosseguimento no seu cadastro"</strong>: If our sales representative sends a message that includes this phrase, the bot will take over from here and automatically proceed with the registration of the new customer.
 
-* <strong>"how can I help"</strong>: If an attendant/commercial representative sends a message that has this phrase included, the bot puts the customer in a state of assistance immediately and stops responding to any message.
+* <strong>"em que posso ajudar"</strong>: If an attendant/commercial representative sends a message that has this phrase included, the bot puts the customer in a state of assistance immediately and stops responding to any message.
 
 <br/> 
 
