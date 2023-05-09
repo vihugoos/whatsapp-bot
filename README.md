@@ -213,7 +213,7 @@ The robot only sees messages from customers who are not being attended to, if so
 ## Infrastructure Liber
 
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/44311634/236981212-fd38fca0-5fec-460a-904e-b747a6be0a7b.png" alt="Logo" height="500" /> 
+  <img src="https://user-images.githubusercontent.com/44311634/236981212-fd38fca0-5fec-460a-904e-b747a6be0a7b.png" alt="Logo" height="550" /> 
 </div>
 
 ### URL of each app: 
