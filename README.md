@@ -160,7 +160,7 @@ With the installation complete, we can start the project.
 
 ## Bot Documentation 
 
-#### Standard Flows 
+### Standard Flows 
 
 1. Selecting "I'm not a customer", the bot sends this case to our commercial representative, who will later be able to release the registration if the payment is approved.
 
@@ -175,7 +175,7 @@ With the installation complete, we can start the project.
 <br/> 
 
 
-#### Flags
+### Flags
 
 * <strong>"finalized service"</strong>: If any Liber attendant sends a message that has these two words included, the bot ends the service. 
 
@@ -186,20 +186,20 @@ With the installation complete, we can start the project.
 <br/> 
 
 
-#### Satisfaction Surveys:
+### Satisfaction Surveys:
 
 Satisfaction surveys are only sent to users who have actually placed an order with us (in fact, our customers).
 
 <br/> 
 
-#### Viewing Messages:
+### Viewing Messages:
 
 The robot only sees messages from customers who are not being attended to, if so, it stops viewing them.
 
 <br/> 
 
 
-#### About Database:
+### About Database:
 
 <strong>Customers</strong>: All customer data is stored, namely: name, CPF, ID, email and cell phone number.
 
@@ -213,10 +213,10 @@ The robot only sees messages from customers who are not being attended to, if so
 ## Infrastructure Liber
 
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/44311634/236981212-fd38fca0-5fec-460a-904e-b747a6be0a7b.png" alt="Logo" height="600" /> 
+  <img src="https://user-images.githubusercontent.com/44311634/236981212-fd38fca0-5fec-460a-904e-b747a6be0a7b.png" alt="Logo" height="500" /> 
 </div>
 
-#### URL of each app: 
+### URL of each app: 
 
 Website Liber: https://libermedicos.com/
 
