@@ -218,6 +218,8 @@ The robot only sees messages from customers who are not being attended to, if so
 
 ### URL of each app: 
 
+Note: All of the above services were done by me.  
+
 Website Liber: https://libermedicos.com/
 
 Dashboard (Operational Monitoring): https://grafana.libermedicos.com/
