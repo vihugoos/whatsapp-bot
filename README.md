@@ -49,6 +49,7 @@
         <li><a href="#url-of-each-app"> URL of each app </a></li>
       </ul>
     </li>
+    <li><a href="#grafana-dashboard"> Grafana Dashboard </a></li>
     <li><a href="#contributing"> Contributing </a></li>
     <li><a href="#contact"> Contact </a></li>
   </ol>
@@ -228,6 +229,16 @@ Prisma platform (Data Manipulation): https://cloud.prisma.io/
 
 <br/> 
 
+
+## Grafana Dashboard
+
+<div align="center">
+  <img src="https://github.com/vihugoos/whatsapp-bot/assets/44311634/07fab9aa-b61b-4450-8f49-e4fc5ae44cb7" alt="Logo" height="550" /> 
+</div> <br>
+
+A dashboard created in Grafana to view all information about requests. Total number of customers, total solicitations, open and closed solicitations, average service time, etc. There is a tab for customer information and another for non-customers. In fact, a complete dashboard in which it is possible to carry out all the company's operational follow-up.
+
+<br>
 
 <!---- CONTRIBUTING ----> 
 ## Contributing
